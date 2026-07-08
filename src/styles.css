@@ -1,9 +1,9 @@
 :root {
   color-scheme: light;
-  --bg: #cfe4c3;
-  --bg-soft: #e8f2d8;
-  --paper: #fbfaee;
-  --paper-deep: #eff4df;
+  --bg: #cddfb9;
+  --bg-soft: #e7eed6;
+  --paper: #fbfaf0;
+  --paper-deep: #eff2e4;
   --ink: #17201c;
   --ink-soft: #33433d;
   --muted: #68746d;
@@ -13,10 +13,10 @@
   --dark-3: #37432f;
   --forest: #0f483e;
   --forest-2: #146456;
-  --moss: #6f8d3c;
-  --lime: #a8f45b;
-  --lime-soft: #d9ff72;
-  --lemon: #f3f45c;
+  --moss: #708847;
+  --lime: #bddd63;
+  --lime-soft: #e9f5a5;
+  --lemon: #e8e87a;
   --sage: #cce7bd;
   --sage-2: #b9d6ab;
   --line: rgba(33, 48, 40, 0.14);
@@ -30,7 +30,7 @@
   --text-md: 16px;
   --text-lg: 17px;
   --text-xl: 22px;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: Inter, "PingFang SC", "Hiragino Sans GB", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
@@ -49,9 +49,8 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(circle at 82% 14%, rgba(243, 244, 92, 0.2), transparent 24rem),
-    radial-gradient(circle at 9% 10%, rgba(168, 244, 91, 0.14), transparent 22rem),
-    linear-gradient(135deg, #17372f 0%, #29483b 48%, #495c3d 100%);
+    linear-gradient(115deg, rgba(232, 232, 122, 0.14), transparent 42%),
+    linear-gradient(135deg, #17362f 0%, #27443a 48%, #405139 100%);
 }
 
 body::before {
@@ -131,15 +130,7 @@ p {
 }
 
 .workspace-sidebar::after {
-  content: "";
-  position: absolute;
-  right: 18px;
-  top: 18px;
-  width: 84px;
-  height: 84px;
-  border-radius: 999px;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(243, 244, 92, 0.16), transparent 70%);
+  display: none;
 }
 
 .brand-block {
@@ -160,15 +151,15 @@ p {
   color: #10382f;
   background:
     linear-gradient(180deg, #ffffff 0%, #edf6e6 100%);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), inset 0 -5px 0 rgba(168, 244, 91, 0.46);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18), inset 0 -5px 0 rgba(189, 221, 99, 0.42);
 }
 
 .brand-block h1 {
   color: #ffffff;
-  font-size: 26px;
-  line-height: 1.08;
+  font-size: 25px;
+  line-height: 1.12;
   letter-spacing: 0;
 }
 
@@ -180,7 +171,7 @@ p {
 
 .brand-block p {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.3;
 }
 
@@ -230,7 +221,7 @@ p {
 
 .status-dot.ok {
   border-color: rgba(168, 244, 91, 0.76);
-  background: #44be73;
+  background: #58bd74;
 }
 
 .status-dot.missing {
@@ -253,7 +244,7 @@ p {
 .key-status.ok {
   border-color: rgba(217, 255, 114, 0.6);
   color: #164f37;
-  background: linear-gradient(180deg, #fffef3 0%, #f0fbe6 100%);
+  background: linear-gradient(180deg, #fffdf0 0%, #f0f6e4 100%);
 }
 
 .key-status.missing {
@@ -342,7 +333,7 @@ p {
 .tool-links a:hover,
 .logout-button:hover,
 .mini-button:hover {
-  border-color: rgba(217, 255, 114, 0.45);
+  border-color: rgba(233, 245, 165, 0.45);
   background: rgba(255, 255, 255, 0.16);
   transform: translateY(-1px);
 }
@@ -350,12 +341,12 @@ p {
 .key-actions button:first-child {
   border-color: rgba(217, 255, 114, 0.42);
   color: #173a25;
-  background: linear-gradient(180deg, #eaff9a 0%, #a8f45b 100%);
+  background: linear-gradient(180deg, #f1f6b4 0%, #bddd63 100%);
 }
 
 .key-actions button:first-child:hover:not(:disabled) {
   color: #102b1e;
-  background: linear-gradient(180deg, #f5ffb1 0%, #b8ff6a 100%);
+  background: linear-gradient(180deg, #f8fac9 0%, #c9e774 100%);
 }
 
 .key-actions button:disabled {
@@ -457,7 +448,7 @@ p {
   color: #1c251d;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.2)),
-    linear-gradient(135deg, #eaffbf 0%, #c1f3ba 100%);
+    linear-gradient(135deg, #edf6d3 0%, #cfe7bd 100%);
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
 }
 
@@ -468,7 +459,7 @@ p {
 .workflow-button.active {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.18)),
-    linear-gradient(135deg, #fff46b 0%, #a8f45b 100%);
+    linear-gradient(135deg, #eef2a6 0%, #bfdc76 100%);
 }
 
 .conversation-title,
@@ -561,7 +552,7 @@ p {
   border: 1px solid rgba(45, 64, 51, 0.14);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 82% 12%, rgba(243, 244, 92, 0.11), transparent 24rem),
+    linear-gradient(120deg, rgba(232, 232, 122, 0.08), transparent 46%),
     linear-gradient(180deg, #203f35 0%, #152f29 100%);
   box-shadow: var(--shadow-dark);
 }
@@ -571,11 +562,11 @@ p {
   align-items: flex-start;
   justify-content: space-between;
   gap: 22px;
-  padding: 24px 34px 20px;
+  padding: 23px 34px 19px;
   color: #18241e;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.3), transparent 52%),
-    linear-gradient(180deg, #e4f0d8 0%, #c9e0bd 100%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.24), transparent 52%),
+    linear-gradient(180deg, #e8efd9 0%, #d0e1c1 100%);
   border-bottom: 1px solid rgba(37, 55, 45, 0.18);
   position: relative;
 }
@@ -592,7 +583,7 @@ p {
 
 .eyebrow {
   color: #146456;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.2;
@@ -602,8 +593,8 @@ p {
 .workbench-header h2 {
   margin-top: 7px;
   color: #141d18;
-  font-size: clamp(30px, 2.75vw, 44px);
-  line-height: 1.06;
+  font-size: clamp(30px, 2.45vw, 40px);
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
@@ -656,7 +647,7 @@ p {
   padding: 22px 32px 28px;
   background:
     linear-gradient(180deg, rgba(201, 224, 189, 0.12), rgba(255, 255, 255, 0)),
-    #1a382f;
+    #1d392f;
 }
 
 .chat-session {
@@ -672,8 +663,8 @@ p {
   border: 1px solid rgba(245, 255, 232, 0.18);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 94% 10%, rgba(243, 244, 92, 0.1), transparent 18rem),
-    linear-gradient(180deg, #243126 0%, #19251f 100%);
+    linear-gradient(120deg, rgba(232, 232, 122, 0.08), transparent 48%),
+    linear-gradient(180deg, #26342b 0%, #1b2822 100%);
   box-shadow:
     0 28px 76px rgba(5, 15, 10, 0.36),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -729,16 +720,15 @@ p {
   min-height: 0;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 18px;
+  padding: 18px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   border: 1px solid rgba(244, 250, 238, 0.12);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 92% 7%, rgba(243, 244, 92, 0.045), transparent 18rem),
     linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035)),
-    #303a31;
+    #313a32;
 }
 
 .message {
@@ -757,8 +747,8 @@ p {
   color: #1d221a;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.1)),
-    linear-gradient(135deg, #f3f45c 0%, #a8f45b 100%);
-  box-shadow: 0 14px 28px rgba(168, 244, 91, 0.13);
+    linear-gradient(135deg, #eee984 0%, #bddd63 100%);
+  box-shadow: 0 14px 28px rgba(189, 221, 99, 0.13);
 }
 
 .message.assistant {
@@ -766,8 +756,8 @@ p {
   margin-right: auto;
   border-color: rgba(244, 250, 238, 0.18);
   background:
-    linear-gradient(180deg, #fffdf1 0%, #f3f2e5 100%);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+    linear-gradient(180deg, #fffdf1 0%, #f2f1e7 100%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
 .message.loading {
@@ -814,7 +804,7 @@ p {
 
 .message-content {
   overflow-wrap: anywhere;
-  font-size: 16px;
+  font-size: 16.5px;
   line-height: 1.64;
 }
 
@@ -979,7 +969,7 @@ p {
 .composer {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 104px;
+  grid-template-columns: minmax(0, 1fr) 96px;
   gap: 9px;
   align-items: stretch;
   padding: 9px;
@@ -1029,7 +1019,7 @@ p {
 }
 
 .composer textarea:focus {
-  border-color: rgba(217, 255, 114, 0.72);
+  border-color: rgba(233, 245, 165, 0.72);
 }
 
 .composer button {
@@ -1037,14 +1027,14 @@ p {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-width: 104px;
+  min-width: 96px;
   min-height: 52px;
   padding: 0 14px;
   border: 1px solid rgba(217, 255, 114, 0.46);
   color: #17201c;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.04)),
-    linear-gradient(135deg, #f3f45c 0%, #a8f45b 100%);
+    linear-gradient(135deg, #eee984 0%, #bddd63 100%);
   font-size: 15.5px;
   box-shadow: 0 14px 30px rgba(168, 244, 91, 0.16);
 }
@@ -1052,7 +1042,7 @@ p {
 .composer button:hover:not(:disabled) {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08)),
-    linear-gradient(135deg, #ffff72 0%, #b8ff6a 100%);
+    linear-gradient(135deg, #f6f0a0 0%, #c9e774 100%);
 }
 
 @media (max-width: 1180px) {
@@ -1113,7 +1103,7 @@ p {
   }
 
   .brand-block h1 {
-    font-size: 25px;
+    font-size: 24px;
   }
 
   .workbench-header {
@@ -1127,7 +1117,7 @@ p {
   }
 
   .workbench-header h2 {
-    font-size: 34px;
+    font-size: 32px;
   }
 
   .header-actions {

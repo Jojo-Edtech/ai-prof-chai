@@ -1,6 +1,6 @@
-# AI Prof. Chai
+# AI 蔡老师
 
-本地项目，用来承接 Chai Ching Sing 老师在 Web of Science 中可导出的论文题录、摘要、DOI 和可合法访问的全文材料，并生成一个面向研究脉络梳理的 AI 工作台。
+本地项目，用来承接蔡老师相关论文的题录、摘要、DOI 和可合法访问的全文材料，并生成一个面向研究脉络梳理的 AI 工作台。
 
 ## Public GitHub Version
 
@@ -24,7 +24,7 @@ It does not publish PDF full text. The local version remains the full workspace 
 
 ## Anonymous Guest Isolation
 
-AI Prof. Chai follows the same anonymous-guest pattern as the Thomas distillation project. No login is required. Each browser profile receives its own anonymous visitor id, stored locally in the browser and mirrored through the protected Worker request header/cookie. One visitor's local chat history does not appear in another visitor's browser.
+AI 蔡老师 follows the same anonymous-guest pattern as the Thomas distillation project. No login is required. Each browser profile receives its own anonymous visitor id, stored locally in the browser and mirrored through the protected Worker request header/cookie. One visitor's local chat history does not appear in another visitor's browser.
 
 Cloudflare Worker usage counters are keyed by anonymous visitor id and by global day:
 
@@ -65,13 +65,13 @@ npm run deploy:worker
 
 ## Web of Science 导出建议
 
-在 Web of Science 检索 `AU=(Chai CS)` 或通过 Researchers 页面定位 Chai Ching Sing 后，导出记录时优先选择：
+在 Web of Science 中通过目标作者身份导出记录时，优先选择：
 
 - Export type: Tab-delimited 或 Plain text / Full Record
 - Record content: Full Record and Cited References
 - File 放入：`data/wos/`
 
-详细交接清单见 `docs/WOS_EXPORT_HANDOFF.md`。
+公开仓库不放具体身份检索清单；需要补数据时请在本地工作区维护。
 
 然后运行：
 
@@ -83,7 +83,7 @@ npm run dev
 
 导入后会生成：
 
-- `data/processed/chai-publications.json`：AI Prof. Chai 使用的本地语料索引
+- `data/processed/chai-publications.json`：AI 蔡老师使用的本地语料索引
 - `data/processed/target-publications.md`：第一作者/通讯作者论文下载清单
 - `data/processed/target-publications.csv`：可核对的下载队列
 
@@ -166,7 +166,7 @@ npm run download:missing-direct
 - `outputs/missing-pdf-cuhk-pure-check.md`：CUHK Pure 页面专项复查，抽取 `citation_pdf_url` 与 `files/*.pdf` 候选并做真实 PDF 字节验证
 - `outputs/target-coverage-matrix.csv` / `.md`：51 篇目标论文的覆盖矩阵，整合角色、PDF 状态、全文索引、审计可信度和下一步动作
 - `outputs/ai-prof-chai-evidence-pack.md` / `.csv`：36 篇已索引 PDF 的主题证据索引、审计可信度和缺口清单
-- `outputs/ai-prof-chai-local-eval.md` / `.json`：不调用外部模型的 AI Prof. Chai 本地问答评测，检查现有语料能回答什么、哪里需要谨慎
+- `outputs/ai-prof-chai-local-eval.md` / `.json`：不调用外部模型的 AI 蔡老师本地问答评测，检查现有语料能回答什么、哪里需要谨慎
 - `outputs/ai-prof-chai-project-status.md`：当前项目状态总控报告
 - `outputs/goal-completion-audit.md`：按原始目标逐项核对完成度、证据文件和剩余缺口
 - `data/wos-downloads/direct-route-download-report-日期.json`：公开 PDF 直链尝试报告，只保存真实 PDF，权限页或 HTML 页会跳过
@@ -175,7 +175,7 @@ npm run download:missing-direct
 
 `npm run distill` 会生成：
 
-- `data/processed/chai-distillation.json`：AI Prof. Chai 的机器可读主题/时间线地图
+- `data/processed/chai-distillation.json`：AI 蔡老师的机器可读主题/时间线地图
 - `outputs/ai-prof-chai-distillation.md`：可直接阅读的研究脉络蒸馏报告
 
 ## OpenAlex 公开预索引
@@ -216,7 +216,7 @@ http://127.0.0.1:4318
 
 本项目优先支持魔搭 ModelScope 的免费 token。`.env.local` 是本机私密配置，已被 `.gitignore` 忽略，不会进入前端页面或仓库。
 
-推荐直接在本地页面的 “AI Prof. Chai” 对话区粘贴 token：输入框是密码框，点击 “保存 token” 后会写入 `.env.local`，再点击 “测试连接” 确认魔搭模型是否真的可用。这个流程不会在聊天里显示 token，也不会把 token 返回到页面结果里。
+推荐直接在本地页面的 “AI 蔡老师” 对话区粘贴 token：输入框是密码框，点击 “保存 token” 后会写入 `.env.local`，再点击 “测试连接” 确认魔搭模型是否真的可用。这个流程不会在聊天里显示 token，也不会把 token 返回到页面结果里。
 
 也可以用本地隐藏输入助手配置，不要把 token 发在聊天里：
 

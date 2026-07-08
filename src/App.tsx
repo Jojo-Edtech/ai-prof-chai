@@ -65,35 +65,35 @@ const workflowTemplates: Record<WorkflowId, { mode: ResearchMode; label: string;
     label: "研究矩阵",
     copy: "对象 × 产出类型",
     prompt:
-      "请作为 AI Prof. Chai，基于蔡老师本地论文语料，把下面的研究方向拆成“对象 × 产出类型”的研究矩阵。\n\n研究方向：\n\n输出请包括：一句话结论、研究矩阵表、3 个可写 paper 方向、下一步行动、证据边界。"
+      "请作为 AI 蔡老师，基于蔡老师论文语料，把下面的研究方向拆成“对象 × 产出类型”的研究矩阵。\n\n研究方向：\n\n输出请包括：一句话结论、研究矩阵表、3 个可写 paper 方向、下一步行动、证据边界。"
   },
   "concept-boundary": {
     mode: "theory-frame",
     label: "概念边界",
     copy: "定义、区分、测量",
     prompt:
-      "请作为 AI Prof. Chai，基于蔡老师论文语料，帮我区分下面概念的边界，并说明如何定义、测量和写进论文。\n\n概念：\n\n输出请包括：定义对照表、边界判断、测量建议、可引用语料依据、证据边界。"
+      "请作为 AI 蔡老师，基于蔡老师论文语料，帮我区分下面概念的边界，并说明如何定义、测量和写进论文。\n\n概念：\n\n输出请包括：定义对照表、边界判断、测量建议、可引用语料依据、证据边界。"
   },
   "variable-model": {
     mode: "research-design",
     label: "变量模型",
     copy: "机制、假设、方法",
     prompt:
-      "请作为 AI Prof. Chai，把下面的研究想法转成变量模型、机制路径、假设草案和方法建议。\n\n研究想法：\n\n输出请包括：变量表、机制路径、假设草案、方法建议、注意风险。"
+      "请作为 AI 蔡老师，把下面的研究想法转成变量模型、机制路径、假设草案和方法建议。\n\n研究想法：\n\n输出请包括：变量表、机制路径、假设草案、方法建议、注意风险。"
   },
   "paper-pipeline": {
     mode: "literature-position",
     label: "论文序列",
     copy: "1/3/5 年 pipeline",
     prompt:
-      "请作为 AI Prof. Chai，为下面的研究方向设计一个 1 年 / 3 年 / 5 年论文序列。\n\n研究方向：\n\n输出请包括：时间线表、每篇 paper 的理论/方法/贡献、可积累资产、证据边界。"
+      "请作为 AI 蔡老师，为下面的研究方向设计一个 1 年 / 3 年 / 5 年论文序列。\n\n研究方向：\n\n输出请包括：时间线表、每篇 paper 的理论/方法/贡献、可积累资产、证据边界。"
   },
   "paragraph-feedback": {
     mode: "writing-feedback",
     label: "段落反馈",
     copy: "诊断、改写、保留",
     prompt:
-      "请作为 AI Prof. Chai，诊断并改写下面的论文段落。请指出逻辑问题、哪些内容保留、哪些需要删改。\n\n段落：\n\n输出请包括：问题诊断表、改写版本、可保留内容、需删除或弱化内容。"
+      "请作为 AI 蔡老师，诊断并改写下面的论文段落。请指出逻辑问题、哪些内容保留、哪些需要删改。\n\n段落：\n\n输出请包括：问题诊断表、改写版本、可保留内容、需删除或弱化内容。"
   }
 };
 
@@ -102,7 +102,7 @@ const defaultMessages: MentorMessage[] = [
     id: "assistant-welcome",
     role: "assistant",
     content:
-      "你好，我是 AI Prof. Chai，一个基于 Chai Ching Sing 本地论文语料的科研导师助手。你可以把研究 idea、论文段落、变量想法或追问发给我。"
+      "你好，我是 AI 蔡老师，一个基于蔡老师论文语料整理的科研导师助手。你可以把研究 idea、论文段落、变量想法或追问发给我。"
   }
 ];
 
@@ -162,7 +162,7 @@ function shortTitle(text: string) {
 }
 
 function roleLabel(role: ChatMessage["role"]) {
-  return role === "user" ? "You" : "AI Prof. Chai";
+  return role === "user" ? "You" : "AI 蔡老师";
 }
 
 function formatTime(value: number) {
@@ -304,8 +304,8 @@ export default function App() {
   const [assistantStatus, setAssistantStatus] = useState<AssistantStatus | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeConversationId, setActiveConversationId] = useState(() => loadActiveId() || conversations[0]?.id || "");
-  const [input, setInput] = useState("帮我看看蔡老师论文里，哪些研究主线最适合蒸馏成 AI Prof. Chai 的导师知识结构");
-  const [status, setStatus] = useState("正在读取本地语料");
+  const [input, setInput] = useState("帮我看看蔡老师论文里，哪些研究主线最适合整理成 AI 蔡老师的导师知识结构");
+  const [status, setStatus] = useState("正在读取论文语料");
   const [sending, setSending] = useState(false);
   const [refreshingPdfs, setRefreshingPdfs] = useState(false);
   const [uploadingPdfs, setUploadingPdfs] = useState(false);
@@ -354,7 +354,7 @@ export default function App() {
       setFullTextStatus(nextFullTextStatus);
       setPdfAuditStatus(nextPdfAuditStatus);
       setMissingPdfQueue(nextMissingPdfQueue);
-      setStatus(nextProfile.summary.total ? "Chai 本地语料已载入" : "等待 WoS 导出文件");
+      setStatus(nextProfile.summary.total ? "蔡老师论文语料已载入" : "等待 WoS 导出文件");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "接口不可用");
     }
@@ -417,7 +417,7 @@ export default function App() {
     });
     setInput("");
     setSending(true);
-    setStatus("AI Prof. Chai 正在回答");
+    setStatus("AI 蔡老师正在回答");
 
     try {
       const result = await requestAssistantReply(stripMessages(nextMessages));
@@ -436,9 +436,9 @@ export default function App() {
             }
           : current
       );
-      setStatus("AI Prof. Chai 已回复");
+      setStatus("AI 蔡老师已回复");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "AI Prof. Chai 暂时不可用";
+      const message = error instanceof Error ? error.message : "AI 蔡老师暂时不可用";
       updateActiveConversation({
         messages: [
           ...nextMessages,
@@ -449,7 +449,7 @@ export default function App() {
           }
         ]
       });
-      setStatus("AI Prof. Chai 连接失败");
+      setStatus("AI 蔡老师连接失败");
     } finally {
       setSending(false);
     }
@@ -559,11 +559,11 @@ export default function App() {
       <aside className="workspace-sidebar">
         <div className="brand-block">
           <div className="brand-mark" aria-hidden="true">
-            C
+            蔡
           </div>
           <div>
-            <h1>AI Prof. Chai</h1>
-            <p>Research Mentor Workspace</p>
+            <h1>AI 蔡老师</h1>
+            <p>研究导师工作台</p>
           </div>
         </div>
 
@@ -574,7 +574,7 @@ export default function App() {
           </div>
           <p className={`key-status ${statusOk ? "ok" : "missing"}`}>
             {assistantStatus?.configured
-              ? `${publicWorkerMode ? "魔搭 Worker" : "魔搭"}已准备好 · 今日余量 ${assistantStatus.quotaLabel}`
+              ? `${publicWorkerMode ? "魔搭 Worker" : "魔搭"} 已准备好 · 今日余量 ${assistantStatus.quotaLabel}`
               : "还没有接入魔搭 token"}
           </p>
           <p className="corpus-line">{corpusLine}</p>
@@ -611,7 +611,7 @@ export default function App() {
 
         <section className="sidebar-section account-section" aria-label="正在使用的语料">
           <h2>正在使用的语料</h2>
-          <p className="user-badge">Chai Ching Sing 本地语料</p>
+          <p className="user-badge">蔡老师论文语料</p>
           <button className="logout-button" type="button" onClick={load}>
             刷新语料
           </button>
@@ -750,8 +750,8 @@ export default function App() {
       <main className="workbench">
         <header className="workbench-header">
           <div>
-            <p className="eyebrow">Research Mentor Corpus</p>
-            <h2>AI Research Mentor</h2>
+            <p className="eyebrow">导师知识库</p>
+            <h2>AI 研究导师</h2>
           </div>
           <div className="header-actions">
             <span className="model-pill">{providerLabel(assistantStatus)}</span>
@@ -762,7 +762,7 @@ export default function App() {
         </header>
 
         <div className="workbench-body">
-          <section className="chat-session" aria-label="与 AI Prof. Chai 持续讨论科研问题">
+          <section className="chat-session" aria-label="与 AI 蔡老师持续讨论科研问题">
             <div className="session-strip" aria-label="当前证据层">
               <span>
                 <strong>{profile?.summary.pdfSaved || 0}</strong>

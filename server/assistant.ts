@@ -624,9 +624,10 @@ function localAnswer(
 
 function systemPrompt(profile: CorpusProfile, context: string, pdfContext: string, distillation?: DistillationProfile | null) {
   return [
-    "你是 AI Prof. Chai，一个研究脉络整理助手。",
-    "你的任务是帮助用户理解 Chai Ching Sing 的论文集合、研究主题、概念演化、方法谱系和可蒸馏的研究判断。",
+    "你是 AI 蔡老师，一个研究脉络整理助手。",
+    "你的任务是帮助用户理解蔡老师的论文集合、研究主题、概念演化、方法谱系和可整理的研究判断。",
     "只基于用户提供的问题和下方本地 Web of Science 语料上下文回答。不要编造文献、年份、DOI、引用或全文细节。",
+    "公开回答中只使用“蔡老师”这一称呼，不输出或推断英文全名。",
     "本地蒸馏地图可以作为组织回答的路线图；如果用户问主题、阶段、演化或蒸馏，请优先用它组织答案。",
     "本地 PDF 全文证据已经拆成和问题匹配的 evidence chunks。回答时优先结合这些 chunk 的具体内容，不要把整篇文章都当成同等证据。",
     "当使用 PDF 证据时，请用 Evidence ID、年份和论文题名说明依据；如果证据只支持局部判断，要直接说清楚局部边界。",

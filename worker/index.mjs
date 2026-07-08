@@ -22,7 +22,7 @@ export default {
     const url = new URL(request.url);
     try {
       if (!url.pathname.startsWith("/api/")) {
-        return json(request, env, { ok: true, service: "AI Prof. Chai ModelScope Worker" });
+        return json(request, env, { ok: true, service: "AI 蔡老师 ModelScope Worker" });
       }
       return await handleApi(request, env, url);
     } catch (error) {
@@ -154,7 +154,7 @@ async function handleAssistantChat(request, env) {
   const messages = normalizeMessages(payload.messages);
   const lastUser = [...messages].reverse().find((message) => message.role === "user");
   if (!lastUser?.content?.trim()) {
-    return json(request, env, { error: "empty_message", message: "请输入要发送给 AI Prof. Chai 的内容。" }, 400);
+    return json(request, env, { error: "empty_message", message: "请输入要发送给 AI 蔡老师的内容。" }, 400);
   }
 
   const user = currentUser(request);
@@ -181,8 +181,8 @@ async function handleAssistantChat(request, env) {
     model: modelName(env),
     quotaLabel: `${remaining}/${limits.globalCap}`,
     citations: [
-      "AI Prof. Chai Distillation Dossier",
-      "AI Prof. Chai Evidence Pack",
+      "AI 蔡老师主题图谱",
+      "AI 蔡老师证据摘要",
       "公开版仅使用压缩证据摘要，不包含 PDF 原文"
     ]
   }));
@@ -223,7 +223,7 @@ async function callModelScope(env, messages) {
         status: freeTierStopped ? 429 : response.status,
         error: freeTierStopped ? "modelscope_quota_exhausted" : "modelscope_error",
         message: freeTierStopped
-          ? "ModelScope 免费额度保护已触发。为避免继续消耗，AI Prof. Chai 今天已暂停调用，明天额度刷新后会自动恢复。"
+          ? "ModelScope 免费额度保护已触发。为避免继续消耗，AI 蔡老师今天已暂停调用，明天额度刷新后会自动恢复。"
           : rawMessage
       };
     }
@@ -259,7 +259,8 @@ ${EVIDENCE_SUMMARY.slice(0, 14000)}
 - 先给结论，再给结构。
 - 研究设计类问题优先给表格。
 - 明确区分已保存 PDF 支持、题录摘要支持、仍需补全文确认。
-- 不输出大段论文原文，不声称自己是 Chai Ching Sing 本人。`;
+- 不输出大段论文原文，不声称自己是蔡老师本人。
+- 公开回答只称“蔡老师”或“AI 蔡老师”，不要输出或推断英文全名。`;
 }
 
 function publicProfile() {
@@ -267,9 +268,9 @@ function publicProfile() {
     generatedAt: "2026-07-08T15:27:19.458Z",
     sourceFiles: ["public-safe worker distillation"],
     professor: {
-      displayName: "Chai Ching Sing",
-      assistantName: "AI Prof. Chai",
-      aliases: ["Chai CS", "Chai Ching Sing"]
+      displayName: "蔡老师",
+      assistantName: "AI 蔡老师",
+      aliases: ["蔡老师"]
     },
     summary: {
       total: 259,
@@ -454,7 +455,7 @@ async function checkAndRecordUsage(env, userId) {
   if (userHourCount >= limits.perHour) return { ok: false, message: `这个访客每小时最多 ${limits.perHour} 次请求。请稍后再试。` };
   if (userDayCount >= limits.perDay) return { ok: false, message: `这个访客每天最多 ${limits.perDay} 次请求。明天会自动恢复。` };
   if (globalDayCount >= limits.globalCap) {
-    return { ok: false, message: "ModelScope 免费额度保护已触发。为避免继续消耗，AI Prof. Chai 今天已暂停调用，明天会自动恢复。" };
+    return { ok: false, message: "ModelScope 免费额度保护已触发。为避免继续消耗，AI 蔡老师今天已暂停调用，明天会自动恢复。" };
   }
 
   const now = new Date().toISOString();

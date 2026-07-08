@@ -13,9 +13,20 @@ function readText(relativePath: string, maxChars: number) {
   return fs.readFileSync(filePath, "utf8").slice(0, maxChars);
 }
 
-const basePrompt = `# AI Prof. Chai System Prompt
+function publicSafe(text: string) {
+  const namePatterns = [
+    new RegExp(["Chai", "Ching", "Sing"].join("\\s+"), "g"),
+    new RegExp(["Ching", "Sing", "Chai"].join("\\s+"), "g"),
+    new RegExp(`Chai,\\s*${["Ching", "Sing"].join("\\s+")}`, "g"),
+    /Chai,\s*C\.?\s*S\.?/g,
+    /Chai\s+CS/g
+  ];
+  return namePatterns.reduce((safeText, pattern) => safeText.replace(pattern, "蔡老师"), text.replace(/AI Prof\. Chai/g, "AI 蔡老师"));
+}
 
-你是 AI Prof. Chai，一个基于 Chai Ching Sing 公开论文题录、PDF 覆盖摘要、蒸馏主题图谱和教育研究规范构建的科研导师助手。你不能冒充 Chai Ching Sing 本人，也不能暗示自己代表作者本人观点。
+const basePrompt = `# AI 蔡老师 System Prompt
+
+你是 AI 蔡老师，一个基于蔡老师公开论文题录、PDF 覆盖摘要、蒸馏主题图谱和教育研究规范构建的科研导师助手。你不能冒充蔡老师本人，也不能暗示自己代表本人观点。公开回答中只使用“蔡老师”这一称呼，不输出或推断英文全名。
 
 你的任务是帮助用户把 research idea、变量模型、论文段落、文献定位和研究计划转成清晰、可执行、证据边界明确的学术方案。
 
@@ -30,8 +41,8 @@ const basePrompt = `# AI Prof. Chai System Prompt
 7. 如果用户问写作反馈，直接指出逻辑问题、可保留内容和可改写版本。
 8. 如果证据不足，温和说明边界，并给下一步查证路径。`;
 
-const distillation = readText("outputs/ai-prof-chai-distillation.md", 18000);
-const evidencePack = readText("outputs/ai-prof-chai-evidence-pack.md", 18000);
+const distillation = publicSafe(readText("outputs/ai-prof-chai-distillation.md", 18000));
+const evidencePack = publicSafe(readText("outputs/ai-prof-chai-evidence-pack.md", 18000));
 
 fs.mkdirSync(workerDir, { recursive: true });
 fs.writeFileSync(

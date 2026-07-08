@@ -360,7 +360,7 @@ function isLocalOrigin(origin?: string) {
 
 app.post("/api/assistant/config", (request, response) => {
   if (!isLocalOrigin(request.header("origin"))) {
-    response.status(403).json({ error: "只能从本地 AI Prof. Chai 页面保存 token。" });
+    response.status(403).json({ error: "只能从本地 AI 蔡老师页面保存 token。" });
     return;
   }
 
@@ -384,7 +384,7 @@ app.post("/api/assistant/config", (request, response) => {
 
 app.post("/api/assistant/check", async (request, response) => {
   if (!isLocalOrigin(request.header("origin"))) {
-    response.status(403).json({ error: "只能从本地 AI Prof. Chai 页面检查模型连接。" });
+    response.status(403).json({ error: "只能从本地 AI 蔡老师页面检查模型连接。" });
     return;
   }
   response.json(await checkAssistantConnection());
@@ -398,7 +398,7 @@ app.post("/api/assistant/chat", async (request, response) => {
     );
   } catch (error) {
     response.status(502).json({
-      error: error instanceof Error ? error.message : "AI Prof. Chai 暂时不可用"
+      error: error instanceof Error ? error.message : "AI 蔡老师暂时不可用"
     });
   }
 });
@@ -412,5 +412,5 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.listen(port, host, () => {
-  console.log(`AI Prof. Chai API running at http://${host}:${port}`);
+  console.log(`AI 蔡老师 API running at http://${host}:${port}`);
 });
