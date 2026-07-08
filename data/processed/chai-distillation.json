@@ -1,0 +1,514 @@
+{
+  "generatedAt": "2026-07-08T15:27:19.458Z",
+  "sourceGeneratedAt": "2026-07-08T15:27:03.577Z",
+  "professor": {
+    "displayName": "Chai Ching Sing",
+    "assistantName": "AI Prof. Chai",
+    "aliases": [
+      "Chai CS",
+      "Chai, Ching Sing",
+      "Chai, C. S."
+    ]
+  },
+  "summary": {
+    "total": 259,
+    "firstAuthor": 46,
+    "correspondingAuthor": 30,
+    "firstOrCorresponding": 51,
+    "openAccess": 66,
+    "pdfSaved": 45,
+    "pdfNeeded": 6
+  },
+  "targetCount": 51,
+  "pdfCoverage": 0.882,
+  "themes": [
+    {
+      "id": "ai-learning-intention",
+      "label": "AI learning intention and motivation",
+      "question": "学生或教师为什么愿意持续学习、教授和使用 AI？",
+      "count": 9,
+      "pdfSaved": 9,
+      "years": "2020-2026",
+      "representativeRecords": [
+        {
+          "title": "From disengaged to self-determined: A latent transition analysis of students' AI learning motivation",
+          "year": "2026",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-026-13998-y",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "A survey study of chinese teachers' continuous intentions to teach artificial intelligence",
+          "year": "2024",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-023-12430-z",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Development and Validation of the Artificial Intelligence Learning Intention Scale (AILIS) for University Students",
+          "year": "2024",
+          "source": "SAGE OPEN",
+          "doi": "10.1177/21582440241242188",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Modeling Chinese Secondary School Students' Behavioral Intentions to Learn Artificial Intelligence with the Theory of Planned Behavior and Self-Determination Theory",
+          "year": "2023",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su15010605",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Secondary school students' intentions to learn AI: testing moderation effects of readiness, social good and optimism",
+          "year": "2022",
+          "source": "ETR&D-EDUCATIONAL TECHNOLOGY RESEARCH AND DEVELOPMENT",
+          "doi": "10.1007/s11423-022-10111-1",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Perceptions of and Behavioral Intentions towards Learning Artificial Intelligence in Primary School Students",
+          "year": "2021",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "tpack-stem-teacher-learning",
+      "label": "TPACK, STEM, and teacher professional learning",
+      "question": "教师如何形成技术、教学法和学科知识的整合能力？",
+      "count": 40,
+      "pdfSaved": 35,
+      "years": "2005-2025",
+      "representativeRecords": [
+        {
+          "title": "Enhancing STEM outcomes through mentorship (Mis)matching: an identity grafting approach",
+          "year": "2025",
+          "source": "INTERNATIONAL JOURNAL OF STEM EDUCATION",
+          "doi": "10.1186/s40594-025-00556-0",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "A survey study of chinese teachers' continuous intentions to teach artificial intelligence",
+          "year": "2024",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-023-12430-z",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Development and Validation of the Artificial Intelligence Learning Intention Scale (AILIS) for University Students",
+          "year": "2024",
+          "source": "SAGE OPEN",
+          "doi": "10.1177/21582440241242188",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Intrinsic Motivation and Sophisticated Epistemic Beliefs Are Promising Pathways to Science Achievement: Evidence From High Achieving Regions in the East and the West",
+          "year": "2021",
+          "source": "FRONTIERS IN PSYCHOLOGY",
+          "doi": "10.3389/fpsyg.2021.581193",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Perceptions of and Behavioral Intentions towards Learning Artificial Intelligence in Primary School Students",
+          "year": "2021",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Factors Influencing Students' Behavioral Intention to Continue Artificial Intelligence Learning",
+          "year": "2020",
+          "source": "2020 INTERNATIONAL SYMPOSIUM ON EDUCATIONAL TECHNOLOGY (ISET 2020)",
+          "doi": "10.1109/ISET49818.2020.00040",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "epistemic-beliefs-knowledge-creation",
+      "label": "Epistemic beliefs and knowledge creation",
+      "question": "教师和学生的认识论信念如何影响知识建构与在线互动？",
+      "count": 26,
+      "pdfSaved": 22,
+      "years": "2005-2024",
+      "representativeRecords": [
+        {
+          "title": "Development and Validation of the Artificial Intelligence Learning Intention Scale (AILIS) for University Students",
+          "year": "2024",
+          "source": "SAGE OPEN",
+          "doi": "10.1177/21582440241242188",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Intrinsic Motivation and Sophisticated Epistemic Beliefs Are Promising Pathways to Science Achievement: Evidence From High Achieving Regions in the East and the West",
+          "year": "2021",
+          "source": "FRONTIERS IN PSYCHOLOGY",
+          "doi": "10.3389/fpsyg.2021.581193",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Surveying and modelling China high school students' experience of and preferences for twenty-first-century learning and their academic and knowledge creation efficacy",
+          "year": "2020",
+          "source": "EDUCATIONAL STUDIES",
+          "doi": "10.1080/03055698.2019.1627662",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Teacher Professional Development for Science, Technology, Engineering and Mathematics (STEM) Education: A Review from the Perspectives of Technological Pedagogical Content (TPACK)",
+          "year": "2019",
+          "source": "ASIA-PACIFIC EDUCATION RESEARCHER",
+          "doi": "10.1007/s40299-018-0400-7",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Surveying Indonesian Teachers' Design Belief and TPACK for 21st Century Oriented Learning",
+          "year": "2017",
+          "source": "25TH INTERNATIONAL CONFERENCE ON COMPUTERS IN EDUCATION (ICCE 2017): TECHNOLOGY AND INNOVATION: COMPUTER-BASED EDUCATIONAL SYSTEMS FOR THE 21ST CENTURY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Assessing multidimensional students' perceptions of twenty-first-century learning practices",
+          "year": "2015",
+          "source": "ASIA PACIFIC EDUCATION REVIEW",
+          "doi": "10.1007/s12564-015-9379-4",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "twenty-first-century-learning",
+      "label": "21st-century learning and learner experience",
+      "question": "21 世纪学习实践如何与学生经验、效能感和学习环境相连？",
+      "count": 19,
+      "pdfSaved": 17,
+      "years": "2009-2026",
+      "representativeRecords": [
+        {
+          "title": "From disengaged to self-determined: A latent transition analysis of students' AI learning motivation",
+          "year": "2026",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-026-13998-y",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "A survey study of chinese teachers' continuous intentions to teach artificial intelligence",
+          "year": "2024",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-023-12430-z",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Development and Validation of the Artificial Intelligence Learning Intention Scale (AILIS) for University Students",
+          "year": "2024",
+          "source": "SAGE OPEN",
+          "doi": "10.1177/21582440241242188",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Modeling Chinese Secondary School Students' Behavioral Intentions to Learn Artificial Intelligence with the Theory of Planned Behavior and Self-Determination Theory",
+          "year": "2023",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su15010605",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Perceptions of and Behavioral Intentions towards Learning Artificial Intelligence in Primary School Students",
+          "year": "2021",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Indonesian Science, Mathematics, and Engineering Preservice Teachers' Experiences in STEM-TPACK Design-Based Learning",
+          "year": "2020",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su12219050",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "ict-teacher-education",
+      "label": "ICT integration and teacher education",
+      "question": "教师教育如何帮助职前教师穿梭于数字世界与学校实践？",
+      "count": 35,
+      "pdfSaved": 31,
+      "years": "2005-2020",
+      "representativeRecords": [
+        {
+          "title": "Indonesian Science, Mathematics, and Engineering Preservice Teachers' Experiences in STEM-TPACK Design-Based Learning",
+          "year": "2020",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su12219050",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Primary students' readiness for learning of artificial intelligence: A case study in Beijing",
+          "year": "2020",
+          "source": "28TH INTERNATIONAL CONFERENCE ON COMPUTERS IN EDUCATION, ICCE 2020",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Surveying and modelling China high school students' experience of and preferences for twenty-first-century learning and their academic and knowledge creation efficacy",
+          "year": "2020",
+          "source": "EDUCATIONAL STUDIES",
+          "doi": "10.1080/03055698.2019.1627662",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Enhancing and Modeling Teachers' Design Beliefs and Efficacy of Technological Pedagogical Content Knowledge for 21st Century Quality Learning",
+          "year": "2019",
+          "source": "JOURNAL OF EDUCATIONAL COMPUTING RESEARCH",
+          "doi": "10.1177/0735633117752453",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Validating and Modelling Teachers' Technological Pedagogical Content Knowledge for Integrative Science, Technology, Engineering and Mathematics Education",
+          "year": "2019",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Examining pre-service teachers' design capacities for web-based 21st century new culture of learning",
+          "year": "2017",
+          "source": "AUSTRALASIAN JOURNAL OF EDUCATIONAL TECHNOLOGY",
+          "doi": "10.14742/ajet.3013",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    }
+  ],
+  "eras": [
+    {
+      "id": "foundations",
+      "label": "2005-2010 Foundations",
+      "focus": "knowledge building, epistemic beliefs, ICT-supported teacher learning",
+      "count": 15,
+      "pdfSaved": 13,
+      "representativeRecords": [
+        {
+          "title": "Facilitating Preservice Teachers' Development of Technological, Pedagogical, and Content Knowledge (TPACK)",
+          "year": "2010",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Modelling the Relationships among Beliefs about Learning, Knowledge, and Teaching of Pre-Service Teachers in Singapore",
+          "year": "2010",
+          "source": "ASIA-PACIFIC EDUCATION RESEARCHER",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "South China Education Majors' Epistemological Beliefs and their Conceptions of the Nature of Science",
+          "year": "2010",
+          "source": "ASIA-PACIFIC EDUCATION RESEARCHER",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "TEACHERS' EPISTEMIC BELIEFS AND THEIR PEDAGOGICAL BELIEFS: A QUALITATIVE CASE STUDY AMONG SINGAPOREAN TEACHERS IN THE CONTEXT OF ICT-SUPPORTED REFORMS",
+          "year": "2010",
+          "source": "TURKISH ONLINE JOURNAL OF EDUCATIONAL TECHNOLOGY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "The Relationships among Singaporean Preservice Teachers' ICT Competencies, Pedagogical Beliefs and their Beliefs on the Espoused Use of ICT",
+          "year": "2010",
+          "source": "ASIA-PACIFIC EDUCATION RESEARCHER",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "tpack-expansion",
+      "label": "2011-2016 TPACK Expansion",
+      "focus": "TPACK validation, teacher education, 21st-century learning practices",
+      "count": 16,
+      "pdfSaved": 13,
+      "representativeRecords": [
+        {
+          "title": "Surveying and Modeling Students' Motivation and Learning Strategies for Mobile-Assisted Seamless Chinese Language Learning",
+          "year": "2016",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Assessing multidimensional students' perceptions of twenty-first-century learning practices",
+          "year": "2015",
+          "source": "ASIA PACIFIC EDUCATION REVIEW",
+          "doi": "10.1007/s12564-015-9379-4",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Deepening ICT integration through multilevel design of Technological Pedagogical Content Knowledge",
+          "year": "2014",
+          "source": "JOURNAL OF COMPUTERS IN EDUCATION",
+          "doi": "10.1007/s40692-014-0002-1",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Harnessing Emerging Technologies to Build the Next Generation of Knowledge Creation Platform for School Students",
+          "year": "2014",
+          "source": "KNOWLEDGE CREATION IN EDUCATION",
+          "doi": "10.1007/978-981-287-047-6_5",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "A Review of Technological Pedagogical Content Knowledge",
+          "year": "2013",
+          "source": "EDUCATIONAL TECHNOLOGY & SOCIETY",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "stem-design",
+      "label": "2017-2020 STEM and Design Beliefs",
+      "focus": "STEM-TPACK, design beliefs, teacher professional learning, early AI learning intention",
+      "count": 12,
+      "pdfSaved": 11,
+      "representativeRecords": [
+        {
+          "title": "An Extended Theory of Planned Behavior for the Modelling of Chinese Secondary School Students' Intention to Learn Artificial Intelligence",
+          "year": "2020",
+          "source": "MATHEMATICS",
+          "doi": "10.3390/math8112089",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Factors Influencing Students' Behavioral Intention to Continue Artificial Intelligence Learning",
+          "year": "2020",
+          "source": "2020 INTERNATIONAL SYMPOSIUM ON EDUCATIONAL TECHNOLOGY (ISET 2020)",
+          "doi": "10.1109/ISET49818.2020.00040",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Indonesian Science, Mathematics, and Engineering Preservice Teachers' Experiences in STEM-TPACK Design-Based Learning",
+          "year": "2020",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su12219050",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Primary students' readiness for learning of artificial intelligence: A case study in Beijing",
+          "year": "2020",
+          "source": "28TH INTERNATIONAL CONFERENCE ON COMPUTERS IN EDUCATION, ICCE 2020",
+          "doi": "",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Surveying and modelling China high school students' experience of and preferences for twenty-first-century learning and their academic and knowledge creation efficacy",
+          "year": "2020",
+          "source": "EDUCATIONAL STUDIES",
+          "doi": "10.1080/03055698.2019.1627662",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    },
+    {
+      "id": "ai-education",
+      "label": "2021-2026 AI Education",
+      "focus": "AI learning intention, motivation, readiness, and curriculum evaluation",
+      "count": 8,
+      "pdfSaved": 8,
+      "representativeRecords": [
+        {
+          "title": "From disengaged to self-determined: A latent transition analysis of students' AI learning motivation",
+          "year": "2026",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-026-13998-y",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Enhancing STEM outcomes through mentorship (Mis)matching: an identity grafting approach",
+          "year": "2025",
+          "source": "INTERNATIONAL JOURNAL OF STEM EDUCATION",
+          "doi": "10.1186/s40594-025-00556-0",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "A survey study of chinese teachers' continuous intentions to teach artificial intelligence",
+          "year": "2024",
+          "source": "EDUCATION AND INFORMATION TECHNOLOGIES",
+          "doi": "10.1007/s10639-023-12430-z",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Development and Validation of the Artificial Intelligence Learning Intention Scale (AILIS) for University Students",
+          "year": "2024",
+          "source": "SAGE OPEN",
+          "doi": "10.1177/21582440241242188",
+          "downloadStatus": "pdf-saved"
+        },
+        {
+          "title": "Modeling Chinese Secondary School Students' Behavioral Intentions to Learn Artificial Intelligence with the Theory of Planned Behavior and Self-Determination Theory",
+          "year": "2023",
+          "source": "SUSTAINABILITY",
+          "doi": "10.3390/su15010605",
+          "downloadStatus": "pdf-saved"
+        }
+      ]
+    }
+  ],
+  "missingPdf": [
+    {
+      "title": "Surveying Chinese teachers' technological pedagogical STEM knowledge: a pilot validation of STEM-TPACK survey",
+      "year": "2020",
+      "source": "INTERNATIONAL JOURNAL OF MOBILE LEARNING AND ORGANISATION",
+      "doi": "10.1504/IJMLO.2020.106181",
+      "expectedPath": "data/pdfs/2020-surveying-chinese-teachers-technological-pedagogical-stem-knowledge-a-pilot-validati-10_1504_IJMLO_2020_106181.pdf",
+      "role": "first_author"
+    },
+    {
+      "title": "Modeling primary school pre-service teachers' Technological Pedagogical Content Knowledge (TPACK) for meaningful learning with information and communication technology (ICT)",
+      "year": "2011",
+      "source": "COMPUTERS & EDUCATION",
+      "doi": "10.1016/j.compedu.2011.01.007",
+      "expectedPath": "data/pdfs/2011-modeling-primary-school-pre-service-teachers-technological-pedagogical-content-knowl-10_1016_j_compedu_2011_01_007.pdf",
+      "role": "first_and_corresponding"
+    },
+    {
+      "title": "Towards a new era of knowledge creation: a brief discussion of the epistemology for knowledge creation",
+      "year": "2011",
+      "source": "INTERNATIONAL JOURNAL OF CONTINUING ENGINEERING EDUCATION AND LIFE-LONG LEARNING",
+      "doi": "10.1504/IJCEELL.2011.039690",
+      "expectedPath": "data/pdfs/2011-towards-a-new-era-of-knowledge-creation-a-brief-discussion-of-the-epistemology-for-k-10_1504_IJCEELL_2011_039690.pdf",
+      "role": "first_and_corresponding"
+    },
+    {
+      "title": "Two exploratory studies of the relationships between teachers' epistemic beliefs and their online interactions",
+      "year": "2011",
+      "source": "INTERNATIONAL JOURNAL OF CONTINUING ENGINEERING EDUCATION AND LIFE-LONG LEARNING",
+      "doi": "10.1504/IJCEELL.2011.039691",
+      "expectedPath": "data/pdfs/2011-two-exploratory-studies-of-the-relationships-between-teachers-epistemic-beliefs-and--10_1504_IJCEELL_2011_039691.pdf",
+      "role": "first_and_corresponding"
+    },
+    {
+      "title": "Teachers' EB and its Influences on their Online Interaction Patterns",
+      "year": "2007",
+      "source": "SUPPORTING LEARNING FLOW THROUGH INTEGRATIVE TECHNOLOGIES",
+      "doi": "",
+      "expectedPath": "data/pdfs/2007-teachers-eb-and-its-influences-on-their-online-interaction-patterns-WOS_000273518800088.pdf",
+      "role": "first_and_corresponding"
+    },
+    {
+      "title": "COMPUTER-SUPPORTED COLLABORATIVE LEARNING FOR KNOWLEDGE CREATION",
+      "year": "2006",
+      "source": "CONTEMPORARY APPROACHES TO RESEARCH ON LEARNING ENVIRONMENTS: WORLDVIEWS",
+      "doi": "10.1142/9789812774651_0024",
+      "expectedPath": "data/pdfs/2006-computer-supported-collaborative-learning-for-knowledge-creation-10_1142_9789812774651_0024.pdf",
+      "role": "first_and_corresponding"
+    }
+  ]
+}
