@@ -317,7 +317,7 @@ export default function App() {
   const [assistantStatus, setAssistantStatus] = useState<AssistantStatus | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeConversationId, setActiveConversationId] = useState(() => loadActiveId() || conversations[0]?.id || "");
-  const [input, setInput] = useState("Help me identify which research strands in Prof. Chai's papers are most suitable for building AI Prof. Chai's mentor knowledge structure.");
+  const [input, setInput] = useState("");
   const [status, setStatus] = useState("Reading paper corpus");
   const [sending, setSending] = useState(false);
   const [refreshingPdfs, setRefreshingPdfs] = useState(false);
@@ -839,7 +839,7 @@ export default function App() {
                     void send();
                   }
                 }}
-                placeholder="Enter a research idea, paragraph, variable model, or follow-up"
+                placeholder="Ask or paste text"
               />
               <button type="submit" disabled={sending || !input.trim()}>
                 <Send size={16} />

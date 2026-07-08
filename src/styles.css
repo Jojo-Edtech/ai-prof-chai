@@ -2076,3 +2076,17 @@ textarea:focus-visible {
     overflow: hidden !important;
   }
 }
+
+@media (max-width: 620px) {
+  .composer {
+    align-items: stretch;
+  }
+
+  .composer textarea {
+    height: 46px;
+    max-height: 86px;
+    overflow-y: auto;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+}
