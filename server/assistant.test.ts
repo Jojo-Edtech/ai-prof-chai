@@ -194,7 +194,7 @@ describe("assistant configuration", () => {
     const result = await checkAssistantConnection();
 
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("余额");
+    expect(result.message).toContain("balance");
     expect(urls).toEqual(["https://api.deepseek.com/user/balance"]);
   });
 
@@ -230,7 +230,7 @@ describe("assistant configuration", () => {
     const result = await checkAssistantConnection();
 
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("还没有检测到魔搭 ModelScope token");
+    expect(result.message).toContain("No ModelScope token has been detected yet");
   });
 
   it("answers distillation questions from the local map when no token is configured", async () => {
@@ -243,7 +243,7 @@ describe("assistant configuration", () => {
     );
 
     expect(response.provider).toBe("disabled");
-    expect(response.message.content).toContain("本地蒸馏地图");
+    expect(response.message.content).toContain("local distillation map");
     expect(response.message.content).toContain("AI learning intention and motivation");
     expect(response.citations[0]).toContain("Teacher learning with AI");
   });
@@ -258,9 +258,9 @@ describe("assistant configuration", () => {
       fullText
     );
 
-    expect(response.message.content).toContain("Evidence chunks 命中");
+    expect(response.message.content).toContain("Matched evidence chunks");
     expect(response.message.content).toContain("artificial intelligence motivation");
-    expect(response.message.content).toContain("证据边界");
+    expect(response.message.content).toContain("Evidence boundary");
     expect(response.citations[0]).toContain("local PDF");
   });
 
@@ -287,7 +287,7 @@ describe("assistant configuration", () => {
       fullText
     );
 
-    expect(response.message.content).toContain("这些判断需要保持谨慎");
+    expect(response.message.content).toContain("These judgments should remain cautious");
     expect(response.message.content).toContain("Missing AI learning paper");
     expect(response.citations[0]).toContain("10.1234/missing-ai");
   });

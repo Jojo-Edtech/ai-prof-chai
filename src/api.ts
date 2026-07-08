@@ -71,7 +71,7 @@ async function getJson<T>(url: string): Promise<T> {
     credentials: "include",
     headers: requestHeaders()
   });
-  if (!response.ok) throw new Error(`请求失败：${response.status}`);
+  if (!response.ok) throw new Error(`Request failed: ${response.status}`);
   return response.json() as Promise<T>;
 }
 
@@ -105,7 +105,7 @@ export async function updateMissingPdfProgress(key: string, status: MissingPdfPr
     body: JSON.stringify({ key, status })
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.error || `Request failed: ${response.status}`);
   return payload as MissingPdfQueue;
 }
 
@@ -123,7 +123,7 @@ export async function configureAssistantToken(token: string) {
     body: JSON.stringify({ token })
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.error || `Request failed: ${response.status}`);
   return payload as AssistantStatus;
 }
 
@@ -134,7 +134,7 @@ export async function checkAssistantConnection() {
     headers: requestHeaders()
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.error || `Request failed: ${response.status}`);
   return payload as AssistantConnectionCheck;
 }
 
@@ -145,7 +145,7 @@ export async function refreshDownloadedPdfs() {
     headers: requestHeaders()
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.message || `Request failed: ${response.status}`);
   return payload as PdfRefreshResult;
 }
 
@@ -160,7 +160,7 @@ export async function uploadPdfFile(file: File) {
     body: await file.arrayBuffer()
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || payload.error || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.message || payload.error || `Request failed: ${response.status}`);
   return payload as PdfUploadResult;
 }
 
@@ -175,6 +175,6 @@ export async function requestAssistantReply(messages: ChatMessage[]) {
   });
 
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || `请求失败：${response.status}`);
+  if (!response.ok) throw new Error(payload.error || `Request failed: ${response.status}`);
   return payload as AssistantResponse;
 }

@@ -22,7 +22,7 @@ export default {
     const url = new URL(request.url);
     try {
       if (!url.pathname.startsWith("/api/")) {
-        return json(request, env, { ok: true, service: "AI 蔡老师 ModelScope Worker" });
+        return json(request, env, { ok: true, service: "AI Prof. Chai ModelScope Worker" });
       }
       return await handleApi(request, env, url);
     } catch (error) {
@@ -56,17 +56,17 @@ async function handleApi(request, env, url) {
   if (request.method === "GET" && pathname === "/api/missing-pdfs") return json(request, env, publicMissingPdfQueue());
   if (request.method === "PATCH" && pathname === "/api/missing-pdfs/progress") return json(request, env, publicMissingPdfQueue());
   if (request.method === "POST" && pathname === "/api/pdfs/refresh") {
-    return json(request, env, { ok: false, message: "公开版不能扫描这台电脑的下载文件；本地完整版可以继续使用这个功能。" }, 405);
+    return json(request, env, { ok: false, message: "The public app cannot scan downloads on this computer. The local version can still use this feature." }, 405);
   }
   if (request.method === "POST" && pathname === "/api/pdfs/upload") {
-    return json(request, env, { ok: false, message: "公开版不接收论文 PDF 上传；请在本地完整版维护语料。" }, 405);
+    return json(request, env, { ok: false, message: "The public app does not accept paper PDF uploads. Please maintain the corpus in the local version." }, 405);
   }
 
   if (request.method === "GET" && pathname === "/api/assistant/config") return assistantConfigResponse(request, env);
   if (request.method === "POST" && pathname === "/api/assistant/config") {
     return json(request, env, {
       error: "public_worker_secret_only",
-      message: "公开版不在网页里保存 token。请把 ModelScope token 配成 Cloudflare Worker secret。"
+      message: "The public app does not save tokens in the webpage. Configure the ModelScope token as a protected Worker secret."
     }, 403);
   }
   if (request.method === "POST" && pathname === "/api/assistant/check") return assistantCheckResponse(request, env);
@@ -117,8 +117,8 @@ async function assistantConfigResponse(request, env) {
     quotaLabel: `${remaining}/${limits.globalCap}`,
     tokenCount: env.MODELSCOPE_API_KEY ? 1 : 0,
     setupHint: env.MODELSCOPE_API_KEY
-      ? "公开版通过 Cloudflare Worker secret 调用 ModelScope；token 不进入 GitHub。"
-      : "Worker 还没有配置 MODELSCOPE_API_KEY secret。",
+      ? "The public app calls ModelScope through a protected Worker secret. The token never enters GitHub."
+      : "The Worker has not configured the MODELSCOPE_API_KEY secret yet.",
     publicWorker: true
   });
 }
@@ -130,7 +130,7 @@ async function assistantCheckResponse(request, env) {
       provider: "modelscope",
       model: modelName(env),
       quotaLabel: "0/0",
-      message: "Worker 还没有配置 ModelScope token。"
+      message: "The Worker has not configured a ModelScope token yet."
     }, 400);
   }
   const usage = await readGlobalUsage(env);
@@ -141,20 +141,20 @@ async function assistantCheckResponse(request, env) {
     provider: "modelscope",
     model: modelName(env),
     quotaLabel: `${remaining}/${limits.globalCap}`,
-    message: "ModelScope Worker 已准备好。"
+    message: "ModelScope Worker is ready."
   });
 }
 
 async function handleAssistantChat(request, env) {
   if (!env.MODELSCOPE_API_KEY) {
-    return json(request, env, { error: "missing_key", message: "ModelScope token 还没有配置到 Worker。" }, 400);
+    return json(request, env, { error: "missing_key", message: "The ModelScope token has not been configured in the Worker yet." }, 400);
   }
 
   const payload = await readJson(request);
   const messages = normalizeMessages(payload.messages);
   const lastUser = [...messages].reverse().find((message) => message.role === "user");
   if (!lastUser?.content?.trim()) {
-    return json(request, env, { error: "empty_message", message: "请输入要发送给 AI 蔡老师的内容。" }, 400);
+    return json(request, env, { error: "empty_message", message: "Please enter a message for AI Prof. Chai." }, 400);
   }
 
   const user = currentUser(request);
@@ -181,9 +181,9 @@ async function handleAssistantChat(request, env) {
     model: modelName(env),
     quotaLabel: `${remaining}/${limits.globalCap}`,
     citations: [
-      "AI 蔡老师主题图谱",
-      "AI 蔡老师证据摘要",
-      "公开版仅使用压缩证据摘要，不包含 PDF 原文"
+      "AI Prof. Chai theme map",
+      "AI Prof. Chai evidence summary",
+      "The public app uses compressed evidence summaries only, not raw PDF text"
     ]
   }));
 }
@@ -223,14 +223,14 @@ async function callModelScope(env, messages) {
         status: freeTierStopped ? 429 : response.status,
         error: freeTierStopped ? "modelscope_quota_exhausted" : "modelscope_error",
         message: freeTierStopped
-          ? "ModelScope 免费额度保护已触发。为避免继续消耗，AI 蔡老师今天已暂停调用，明天额度刷新后会自动恢复。"
+          ? "ModelScope free-quota protection has been triggered. To avoid further usage, AI Prof. Chai is paused for today and will resume after the quota refreshes tomorrow."
           : rawMessage
       };
     }
     const choice = Array.isArray(data?.choices) ? data.choices[0] : null;
     const answer = String(choice?.message?.content || choice?.text || "").trim();
     if (!answer) {
-      return { ok: false, status: 502, error: "empty_model_response", message: "ModelScope 返回了空内容，请稍后再试。" };
+      return { ok: false, status: 502, error: "empty_model_response", message: "ModelScope returned an empty response. Please try again later." };
     }
     return { ok: true, answer };
   } catch (error) {
@@ -238,7 +238,7 @@ async function callModelScope(env, messages) {
       ok: false,
       status: 500,
       error: "request_failed",
-      message: error?.name === "AbortError" ? "ModelScope 响应超时。" : error?.message || "ModelScope 请求失败。"
+      message: error?.name === "AbortError" ? "ModelScope timed out." : error?.message || "ModelScope request failed."
     };
   } finally {
     clearTimeout(timeout);
@@ -248,19 +248,19 @@ async function callModelScope(env, messages) {
 function buildSystemPrompt() {
   return `${BASE_SYSTEM_PROMPT}
 
-压缩知识底座：
+Compressed Knowledge Base:
 ${DISTILLED_KNOWLEDGE.slice(0, 14000)}
 
-证据索引摘要：
+Evidence Index Summary:
 ${EVIDENCE_SUMMARY.slice(0, 14000)}
 
-回答要求：
-- 用中文回答，除非用户明确要求英文。
-- 先给结论，再给结构。
-- 研究设计类问题优先给表格。
-- 明确区分已保存 PDF 支持、题录摘要支持、仍需补全文确认。
-- 不输出大段论文原文，不声称自己是蔡老师本人。
-- 公开回答只称“蔡老师”或“AI 蔡老师”，不要输出或推断英文全名。`;
+Response Rules:
+- Answer in the user's language; default to English when the user's language is unclear.
+- Start with the conclusion, then give the structure.
+- For research design questions, prefer compact tables.
+- Clearly distinguish saved-PDF evidence, bibliographic/abstract-level evidence, and claims that still need full-text confirmation.
+- Do not quote long passages from papers, and do not claim to be Prof. Chai personally.
+- Refer to the mentor as "Prof. Chai" or "AI Prof. Chai"; do not output or infer any private identity details.`;
 }
 
 function publicProfile() {
@@ -268,9 +268,9 @@ function publicProfile() {
     generatedAt: "2026-07-08T15:27:19.458Z",
     sourceFiles: ["public-safe worker distillation"],
     professor: {
-      displayName: "蔡老师",
-      assistantName: "AI 蔡老师",
-      aliases: ["蔡老师"]
+      displayName: "Prof. Chai",
+      assistantName: "AI Prof. Chai",
+      aliases: ["Prof. Chai"]
     },
     summary: {
       total: 259,
@@ -294,11 +294,11 @@ function publicDistillation() {
     targetCount: 51,
     pdfCoverage: 45 / 51,
     themes: [
-      { id: "ai-intention", label: "AI learning intention and motivation", question: "学生或教师为什么愿意持续学习、教授和使用 AI？", count: 9, pdfSaved: 9, years: "2020-2026", representativeRecords: [] },
-      { id: "tpack", label: "TPACK, STEM, and teacher professional learning", question: "教师如何形成技术、教学法和学科知识的整合能力？", count: 40, pdfSaved: 35, years: "2005-2025", representativeRecords: [] },
-      { id: "epistemic", label: "Epistemic beliefs and knowledge creation", question: "教师和学生的认识论信念如何影响知识建构与在线互动？", count: 26, pdfSaved: 22, years: "2005-2024", representativeRecords: [] },
-      { id: "learner-experience", label: "21st-century learning and learner experience", question: "21 世纪学习实践如何与学生经验、效能感和学习环境相连？", count: 19, pdfSaved: 17, years: "2009-2026", representativeRecords: [] },
-      { id: "teacher-education", label: "ICT integration and teacher education", question: "教师教育如何帮助职前教师穿梭于数字世界与学校实践？", count: 35, pdfSaved: 31, years: "2005-2020", representativeRecords: [] }
+      { id: "ai-intention", label: "AI learning intention and motivation", question: "Why do students and teachers sustain their willingness to learn, teach, and use AI?", count: 9, pdfSaved: 9, years: "2020-2026", representativeRecords: [] },
+      { id: "tpack", label: "TPACK, STEM, and teacher professional learning", question: "How do teachers develop integrated technological, pedagogical, and content knowledge?", count: 40, pdfSaved: 35, years: "2005-2025", representativeRecords: [] },
+      { id: "epistemic", label: "Epistemic beliefs and knowledge creation", question: "How do teachers' and students' epistemic beliefs shape knowledge building and online interaction?", count: 26, pdfSaved: 22, years: "2005-2024", representativeRecords: [] },
+      { id: "learner-experience", label: "21st-century learning and learner experience", question: "How do 21st-century learning practices connect with learner experience, efficacy, and learning environments?", count: 19, pdfSaved: 17, years: "2009-2026", representativeRecords: [] },
+      { id: "teacher-education", label: "ICT integration and teacher education", question: "How can teacher education help preservice teachers move between digital worlds and school practice?", count: 35, pdfSaved: 31, years: "2005-2020", representativeRecords: [] }
     ],
     eras: [
       { id: "2005-2010", label: "2005-2010 Foundations", focus: "knowledge building, epistemic beliefs, ICT-supported teacher learning", count: 15, pdfSaved: 13, representativeRecords: [] },
@@ -436,7 +436,7 @@ async function readGlobalUsage(env) {
 }
 
 async function checkAndRecordUsage(env, userId) {
-  if (!env.AI_PROF_CHAI_KV) return { ok: false, message: "Worker KV 还没有绑定，暂时不能安全调用模型。" };
+  if (!env.AI_PROF_CHAI_KV) return { ok: false, message: "Worker KV is not bound yet, so the model cannot be called safely." };
 
   const limits = readLimits(env);
   const windows = usageWindow();
@@ -452,10 +452,10 @@ async function checkAndRecordUsage(env, userId) {
   const userDayCount = Number(userDay?.count || 0);
   const globalDayCount = Number(globalDay?.globalDayCount || 0);
 
-  if (userHourCount >= limits.perHour) return { ok: false, message: `这个访客每小时最多 ${limits.perHour} 次请求。请稍后再试。` };
-  if (userDayCount >= limits.perDay) return { ok: false, message: `这个访客每天最多 ${limits.perDay} 次请求。明天会自动恢复。` };
+  if (userHourCount >= limits.perHour) return { ok: false, message: `This visitor can send up to ${limits.perHour} requests per hour. Please try again later.` };
+  if (userDayCount >= limits.perDay) return { ok: false, message: `This visitor can send up to ${limits.perDay} requests per day. It will reset tomorrow.` };
   if (globalDayCount >= limits.globalCap) {
-    return { ok: false, message: "ModelScope 免费额度保护已触发。为避免继续消耗，AI 蔡老师今天已暂停调用，明天会自动恢复。" };
+    return { ok: false, message: "ModelScope free-quota protection has been triggered. To avoid further usage, AI Prof. Chai is paused for today and will resume tomorrow." };
   }
 
   const now = new Date().toISOString();

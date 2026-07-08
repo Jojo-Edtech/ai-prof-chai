@@ -205,7 +205,7 @@ function readQuota(config: ProviderConfig) {
 }
 
 function quotaLabel(config: ProviderConfig, used?: number) {
-  if (config.dailyLimit <= 0) return "不限额";
+  if (config.dailyLimit <= 0) return "unlimited";
   const current = used ?? readQuota(config).used;
   return `${Math.max(0, config.dailyLimit - current)}/${config.dailyLimit}`;
 }
@@ -215,7 +215,7 @@ function claimQuota(config: ProviderConfig) {
   const today = new Date().toISOString().slice(0, 10);
   const state = readQuota(config);
   const nextState = state.date === today ? state : { date: today, used: 0 };
-  if (nextState.used >= config.dailyLimit) throw new Error(`今日 ${config.projectId} 的模型额度已用完。`);
+  if (nextState.used >= config.dailyLimit) throw new Error(`Today's model quota for ${config.projectId} has been used up.`);
   nextState.used += 1;
   fs.writeFileSync(quotaFile(config), JSON.stringify(nextState, null, 2), "utf8");
   return quotaLabel(config, nextState.used);
@@ -228,11 +228,11 @@ export function assistantStatus(): AssistantStatus {
     config.provider === "deepseek"
       ? "DeepSeek"
       : config.provider === "dashscope"
-        ? "阿里云百炼 DashScope"
+        ? "Alibaba Bailian DashScope"
         : config.provider === "modelscope"
-          ? "魔搭 ModelScope"
-          : "未启用";
-  const tokenLabel = config.tokens.length > 1 ? `${config.tokens.length} 枚 token` : "1 枚 token";
+          ? "ModelScope"
+          : "Disabled";
+  const tokenLabel = config.tokens.length > 1 ? `${config.tokens.length} tokens` : "1 token";
 
   return {
     configured,
@@ -243,9 +243,9 @@ export function assistantStatus(): AssistantStatus {
     tokenCount: config.tokens.length,
     setupHint: configured
       ? config.provider === "deepseek"
-        ? `已配置 ${providerName}（${tokenLabel}），本地每日额度 ${quotaLabel(config)}；DeepSeek 会先查余额再调用。`
-        : `已配置 ${providerName}（${tokenLabel}），本地每日额度 ${quotaLabel(config)}。`
-      : `未配置 ${providerName} token，目前使用本地规则回答。`
+        ? `${providerName} is configured (${tokenLabel}). Local daily quota: ${quotaLabel(config)}. DeepSeek balance is checked before each call.`
+        : `${providerName} is configured (${tokenLabel}). Local daily quota: ${quotaLabel(config)}.`
+      : `${providerName} token is not configured yet. Local rule-based answers are available.`
   };
 }
 
@@ -284,12 +284,12 @@ function balanceFloor(config: ProviderConfig, currency: string) {
 }
 
 function formatBalance(currency: string, total: number, floor: number) {
-  return `${currency || "UNKNOWN"} ${total.toFixed(2)}（下限 ${floor.toFixed(2)}）`;
+  return `${currency || "UNKNOWN"} ${total.toFixed(2)} (floor ${floor.toFixed(2)})`;
 }
 
 async function assertProviderBalance(config: ProviderConfig, token: string) {
   if (config.provider !== "deepseek") return;
-  if (!config.balanceEndpoint) throw new Error("DeepSeek 余额检查端点未配置，已停止调用。");
+  if (!config.balanceEndpoint) throw new Error("DeepSeek balance endpoint is not configured, so the call was stopped.");
 
   const response = await fetch(config.balanceEndpoint, {
     method: "GET",
@@ -301,12 +301,12 @@ async function assertProviderBalance(config: ProviderConfig, token: string) {
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
-    throw new Error(`DeepSeek 余额检查失败：HTTP ${response.status}${body ? `：${body.slice(0, 120)}` : ""}`);
+    throw new Error(`DeepSeek balance check failed: HTTP ${response.status}${body ? `: ${body.slice(0, 120)}` : ""}`);
   }
 
   const payload = (await response.json()) as DeepSeekBalanceResponse;
   if (payload.is_available === false) {
-    throw new Error("DeepSeek 余额不足，已停止调用，避免继续扣费。");
+    throw new Error("DeepSeek balance is unavailable, so the call was stopped to avoid further charges.");
   }
 
   const balances = (payload.balance_infos || [])
@@ -318,11 +318,11 @@ async function assertProviderBalance(config: ProviderConfig, token: string) {
     .filter((info) => info.currency);
 
   if (!balances.length) {
-    throw new Error("DeepSeek 余额检查没有返回可读余额，已停止调用。");
+    throw new Error("DeepSeek balance check did not return a readable balance, so the call was stopped.");
   }
 
   if (!balances.some((info) => info.total > info.floor)) {
-    throw new Error(`DeepSeek 余额已低于本地保护线：${balances.map((info) => formatBalance(info.currency, info.total, info.floor)).join(" / ")}。`);
+    throw new Error(`DeepSeek balance is below the local protection floor: ${balances.map((info) => formatBalance(info.currency, info.total, info.floor)).join(" / ")}.`);
   }
 }
 
@@ -334,7 +334,7 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
       provider: config.provider,
       model: config.model,
       quotaLabel: quotaLabel(config),
-      message: "AI 对话当前未启用。"
+      message: "AI chat is currently disabled."
     };
   }
   if (!config.tokens.length) {
@@ -345,10 +345,10 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
       quotaLabel: quotaLabel(config),
       message:
         config.provider === "deepseek"
-          ? "还没有检测到 DeepSeek API key。"
+          ? "No DeepSeek API key has been detected yet."
           : config.provider === "modelscope"
-            ? "还没有检测到魔搭 ModelScope token。"
-            : "还没有检测到模型 token。"
+            ? "No ModelScope token has been detected yet."
+            : "No model token has been detected yet."
     };
   }
 
@@ -360,7 +360,7 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
         await assertProviderBalance(config, token);
         remaining = claimQuota(config);
       } catch (error) {
-        lastMessage = error instanceof Error ? error.message : "模型余额或本地额度检查失败。";
+        lastMessage = error instanceof Error ? error.message : "Model balance or local quota check failed.";
         continue;
       }
 
@@ -368,8 +368,8 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
         config,
         token,
         [
-          { role: "system", content: "你是一个连接检查助手。只用中文简短回答。" },
-          { role: "user", content: "回复“已接通”即可。" }
+          { role: "system", content: "You are a connection check assistant. Reply briefly in English." },
+          { role: "user", content: "Reply with \"connected\" only." }
         ],
         16,
         0
@@ -377,7 +377,7 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
 
       if (!response.ok) {
         const body = await response.text().catch(() => "");
-        lastMessage = `${config.provider} token ${index + 1}/${config.tokens.length} 返回 HTTP ${response.status}${body ? `：${body.slice(0, 120)}` : ""}`;
+        lastMessage = `${config.provider} token ${index + 1}/${config.tokens.length} returned HTTP ${response.status}${body ? `: ${body.slice(0, 120)}` : ""}`;
         if (retryWithNextToken(response.status)) continue;
         break;
       }
@@ -390,8 +390,8 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
         model: config.model,
         quotaLabel: remaining,
         message: content
-          ? `AI 对话已接通：${content}${config.tokens.length > 1 ? `（使用 token ${index + 1}/${config.tokens.length}）` : ""}`
-          : `${config.provider} 已响应，但返回格式没有可读文本。`
+          ? `AI chat is connected: ${content}${config.tokens.length > 1 ? ` (using token ${index + 1}/${config.tokens.length})` : ""}`
+          : `${config.provider} responded, but the returned format did not contain readable text.`
       };
     }
 
@@ -400,7 +400,7 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
       provider: config.provider,
       model: config.model,
       quotaLabel: quotaLabel(config),
-      message: lastMessage || "所有模型 token 均未通过连接检查。"
+      message: lastMessage || "No model token passed the connection check."
     };
   } catch (error) {
     return {
@@ -408,7 +408,7 @@ export async function checkAssistantConnection(): Promise<AssistantConnectionChe
       provider: config.provider,
       model: config.model,
       quotaLabel: quotaLabel(config),
-      message: error instanceof Error ? error.message : "AI 对话连接检查失败。"
+      message: error instanceof Error ? error.message : "AI chat connection check failed."
     };
   }
 }
@@ -434,7 +434,7 @@ function wantsCoverageCaution(question: string) {
 }
 
 function distillationContext(distillation?: DistillationProfile | null) {
-  if (!distillation?.themes?.length) return "暂无本地蒸馏地图。";
+  if (!distillation?.themes?.length) return "No local distillation map is available yet.";
   const themeLines = distillation.themes
     .map(
       (theme) =>
@@ -449,7 +449,7 @@ function distillationContext(distillation?: DistillationProfile | null) {
     "Theme map:",
     themeLines,
     "Timeline:",
-    eraLines || "- 暂无时间线。",
+    eraLines || "- No timeline is available yet.",
     `Missing target PDFs: ${distillation.missingPdf.length}`
   ].join("\n");
 }
@@ -462,20 +462,20 @@ function fullTextCitations(hits: ReturnType<typeof retrieveFullText>) {
 }
 
 function fullTextStatusLine(fullText?: FullTextIndex | null) {
-  if (!fullText) return "全文索引尚未生成。";
+  if (!fullText) return "The full-text index has not been generated yet.";
   const evidenceChunks = fullText.summary.evidenceChunks ?? countEvidenceChunks(fullText);
-  return `全文索引已生成：${fullText.summary.indexed}/${fullText.summary.targetPdfSaved} 篇已保存目标 PDF、约 ${evidenceChunks} 个 evidence chunks 可检索。`;
+  return `The full-text index is ready: ${fullText.summary.indexed}/${fullText.summary.targetPdfSaved} saved target PDFs and about ${evidenceChunks} searchable evidence chunks.`;
 }
 
 function roleLabel(record: { isFirstAuthor?: boolean; isCorrespondingAuthor?: boolean }) {
-  if (record.isFirstAuthor && record.isCorrespondingAuthor) return "第一作者/通讯作者";
-  if (record.isFirstAuthor) return "第一作者";
-  if (record.isCorrespondingAuthor) return "通讯作者";
-  return "合作者";
+  if (record.isFirstAuthor && record.isCorrespondingAuthor) return "first author / corresponding author";
+  if (record.isFirstAuthor) return "first author";
+  if (record.isCorrespondingAuthor) return "corresponding author";
+  return "co-author";
 }
 
 function compactRecordLine(record: ReturnType<typeof retrieveRecords>[number], index: number) {
-  return `${index + 1}. ${record.title}（${record.year || "n.d."}，${roleLabel(record)}${record.doi ? `，DOI: ${record.doi}` : ""}）`;
+  return `${index + 1}. ${record.title} (${record.year || "n.d."}, ${roleLabel(record)}${record.doi ? `, DOI: ${record.doi}` : ""})`;
 }
 
 function evidenceBoundary(profile: CorpusProfile, distillation?: DistillationProfile | null, fullText?: FullTextIndex | null) {
@@ -483,18 +483,18 @@ function evidenceBoundary(profile: CorpusProfile, distillation?: DistillationPro
   const indexed = fullText?.summary.indexed ?? 0;
   const saved = fullText?.summary.targetPdfSaved ?? profile.summary.pdfSaved;
   const evidenceChunks = fullText ? (fullText.summary.evidenceChunks ?? countEvidenceChunks(fullText)) : 0;
-  return `证据边界：当前已保存并索引 ${indexed}/${saved} 篇目标 PDF，拆成约 ${evidenceChunks} 个 evidence chunks；仍缺 ${missing} 篇目标 PDF。涉及缺失全文的判断只能先作为题录层判断。`;
+  return `Evidence boundary: ${indexed}/${saved} saved target PDFs are indexed into about ${evidenceChunks} evidence chunks; ${missing} target PDFs are still pending. Claims involving missing full texts should remain bibliographic-level until the PDFs are added.`;
 }
 
 function localDistillationAnswer(profile: CorpusProfile, distillation: DistillationProfile, fullText?: FullTextIndex | null): AssistantResponse {
   const themeLines = distillation.themes
     .map(
       (theme, index) =>
-        `${index + 1}. ${theme.label}：${theme.count} 篇目标论文，已存 ${theme.pdfSaved} 篇 PDF，跨度 ${theme.years}。核心问题：${theme.question}`
+        `${index + 1}. ${theme.label}: ${theme.count} target papers, ${theme.pdfSaved} saved PDFs, years ${theme.years}. Guiding question: ${theme.question}`
     )
     .join("\n");
   const eraLines = distillation.eras
-    .map((era) => `- ${era.label}：${era.focus}（${era.count} 篇目标论文，${era.pdfSaved} 篇 PDF）`)
+    .map((era) => `- ${era.label}: ${era.focus} (${era.count} target papers, ${era.pdfSaved} saved PDFs)`)
     .join("\n");
   const representativeRecords = distillation.themes.flatMap((theme) => theme.representativeRecords).slice(0, 8);
 
@@ -503,22 +503,22 @@ function localDistillationAnswer(profile: CorpusProfile, distillation: Distillat
       id: `assistant-${Date.now()}`,
       role: "assistant",
       content: [
-        "我先用本地蒸馏地图回答：",
+        "I will answer from the local distillation map first:",
         "",
-        "主题线：",
-        themeLines || "暂无主题线。",
+        "Theme strands:",
+        themeLines || "No theme strands are available yet.",
         "",
-        "时间线：",
-        eraLines || "暂无时间线。",
+        "Timeline:",
+        eraLines || "No timeline is available yet.",
         "",
-        `覆盖情况：目标论文 ${distillation.targetCount} 篇，已存全文 ${profile.summary.pdfSaved} 篇，还有 ${distillation.missingPdf.length} 篇目标 PDF 待补。${fullTextStatusLine(fullText)}缺全文的论文可以做题录层面的判断，但不能展开全文细节。`,
+        `Coverage: ${distillation.targetCount} target papers, ${profile.summary.pdfSaved} saved full texts, and ${distillation.missingPdf.length} target PDFs still pending. ${fullTextStatusLine(fullText)} Missing full texts can support bibliographic-level judgment, but not detailed full-text claims.`,
         "",
         evidenceBoundary(profile, distillation, fullText)
       ].join("\n")
     },
     provider: "disabled",
     model: "local-rules",
-    quotaLabel: "不限额",
+    quotaLabel: "unlimited",
     citations: representativeRecords.map(distillationRecordCitation)
   };
 }
@@ -540,21 +540,21 @@ function localCoverageAnswer(profile: CorpusProfile, distillation: DistillationP
       id: `assistant-${Date.now()}`,
       role: "assistant",
       content: [
-        "这些判断需要保持谨慎：",
+        "These judgments should remain cautious:",
         "",
-        `1. 覆盖率限制：目标论文 ${distillation.targetCount} 篇，已存全文 ${profile.summary.pdfSaved} 篇，还有 ${missing.length} 篇目标 PDF 待补。${fullTextStatusLine(fullText)}`,
-        `2. 角色限制：缺失清单中第一作者相关 ${firstAuthorMissing} 篇，通讯作者相关 ${correspondingMissing} 篇；有些论文可能同时属于两类，所以不能简单相加为总数。`,
-        "3. 结论限制：对缺失论文只能做题录、摘要、DOI、来源和下载路线层面的判断；不能确认全文中的方法细节、量表条目、统计模型、效应量、讨论边界或具体引用措辞。",
-        "4. 主题限制：早期 CSCL/知识建构、TPACK/STEM-TPACK、教师发展和部分 AI 学习意向论文仍有缺口；这些主题的阶段性判断要等 PDF 补齐后再定稿。",
+        `1. Coverage limit: ${distillation.targetCount} target papers, ${profile.summary.pdfSaved} saved full texts, and ${missing.length} target PDFs still pending. ${fullTextStatusLine(fullText)}`,
+        `2. Role limit: the missing list includes ${firstAuthorMissing} first-author-related papers and ${correspondingMissing} corresponding-author-related papers. Some papers may belong to both groups, so these counts should not simply be added together.`,
+        "3. Claim limit: for missing papers, we can judge bibliography, abstract, DOI, source, and acquisition route, but not method details, scale items, statistical models, effect sizes, discussion boundaries, or exact wording.",
+        "4. Theme limit: early CSCL/knowledge building, TPACK/STEM-TPACK, teacher development, and some AI learning intention papers still have gaps. These strand-level judgments should be finalized only after the PDFs are added.",
         "",
-        "优先补齐的缺失目标：",
-        missingLines || "当前没有缺失目标 PDF。",
-        missing.length > 10 ? `\n还有 ${missing.length - 10} 篇未在这里展开，可查看 PDF 补齐队列。` : ""
+        "Priority missing targets:",
+        missingLines || "There are no missing target PDFs right now.",
+        missing.length > 10 ? `\n${missing.length - 10} more papers are not expanded here. Check the PDF completion queue for the full list.` : ""
       ].join("\n")
     },
     provider: "disabled",
     model: "local-rules",
-    quotaLabel: "不限额",
+    quotaLabel: "unlimited",
     citations: missing.slice(0, 10).map((record) => `${record.year || "n.d."} | ${record.title}${record.doi ? ` | DOI: ${record.doi}` : ""}`)
   };
 }
@@ -573,23 +573,23 @@ function localAnswer(
   const pdfHits = retrieveFullText(fullText, question || "AI education teacher learning", 3);
   const recordLines = records.length
     ? records.map((record, index) => compactRecordLine(record, index)).join("\n")
-    : "当前还没有导入 WoS 记录。";
+    : "No Web of Science records have been imported yet.";
   const fullTextLines = pdfHits.length
     ? pdfHits
         .map(
           (hit, index) =>
-            `${index + 1}. ${hit.record.title}（${hit.record.year || "n.d."}，${hit.evidenceId}）：${hit.excerpt.slice(0, 520)}`
+            `${index + 1}. ${hit.record.title} (${hit.record.year || "n.d."}, ${hit.evidenceId}): ${hit.excerpt.slice(0, 520)}`
         )
         .join("\n")
     : "";
   const answerLead = pdfHits.length
-    ? `可以先基于 ${pdfHits.length} 条和当前问题最贴近的本地 PDF evidence chunks 回答；下面的判断优先来自这些已保存 PDF 段落。`
-    : "当前问题没有命中已保存 PDF evidence chunk；我先用 WoS 题录、摘要和蒸馏地图定位，结论需要回到 PDF 再确认。";
+    ? `I can answer first from ${pdfHits.length} local PDF evidence chunk(s) closest to this question; the judgments below prioritize those saved PDF passages.`
+    : "This question did not match a saved PDF evidence chunk. I will position it with WoS records, abstracts, and the distillation map, but the conclusion should be checked against PDFs before final use.";
   const themeHint = distillation?.themes?.length
-    ? `蒸馏地图已生成：${distillation.themes
+    ? `The distillation map is ready: ${distillation.themes
         .slice(0, 3)
         .map((theme) => theme.label)
-        .join("；")}。你可以问“按主题蒸馏蔡老师研究脉络”。`
+        .join("; ")}. You can ask for a theme-based distillation of Prof. Chai's research trajectory.`
     : "";
 
   return {
@@ -597,48 +597,48 @@ function localAnswer(
       id: `assistant-${Date.now()}`,
       role: "assistant",
       content: [
-        "我现在先用本地语料索引回答：",
+        "I will answer first from the local corpus index:",
         "",
-        "可验证判断：",
+        "Verifiable judgment:",
         answerLead,
         "",
-        "相关题录：",
+        "Relevant records:",
         recordLines,
         "",
-        fullTextLines ? `Evidence chunks 命中：\n${fullTextLines}` : fullTextStatusLine(fullText),
+        fullTextLines ? `Matched evidence chunks:\n${fullTextLines}` : fullTextStatusLine(fullText),
         "",
         evidenceBoundary(profile, distillation, fullText),
         "",
         profile.summary.total
-          ? `语料中共有 ${profile.summary.total} 条记录，其中第一作者 ${profile.summary.firstAuthor} 条，通讯作者 ${profile.summary.correspondingAuthor} 条。`
-          : "请先把 Web of Science 导出文件放入 data/wos/，再运行 npm run import:wos。",
+          ? `The corpus contains ${profile.summary.total} records, including ${profile.summary.firstAuthor} first-author records and ${profile.summary.correspondingAuthor} corresponding-author records.`
+          : "Place the Web of Science export files in data/wos/, then run npm run import:wos.",
         themeHint
       ].join("\n")
     },
     provider: "disabled",
     model: "local-rules",
-    quotaLabel: "不限额",
+    quotaLabel: "unlimited",
     citations: [...fullTextCitations(pdfHits), ...citations(records)].slice(0, 10)
   };
 }
 
 function systemPrompt(profile: CorpusProfile, context: string, pdfContext: string, distillation?: DistillationProfile | null) {
   return [
-    "你是 AI 蔡老师，一个研究脉络整理助手。",
-    "你的任务是帮助用户理解蔡老师的论文集合、研究主题、概念演化、方法谱系和可整理的研究判断。",
-    "只基于用户提供的问题和下方本地 Web of Science 语料上下文回答。不要编造文献、年份、DOI、引用或全文细节。",
-    "公开回答中只使用“蔡老师”这一称呼，不输出或推断英文全名。",
-    "本地蒸馏地图可以作为组织回答的路线图；如果用户问主题、阶段、演化或蒸馏，请优先用它组织答案。",
-    "本地 PDF 全文证据已经拆成和问题匹配的 evidence chunks。回答时优先结合这些 chunk 的具体内容，不要把整篇文章都当成同等证据。",
-    "当使用 PDF 证据时，请用 Evidence ID、年份和论文题名说明依据；如果证据只支持局部判断，要直接说清楚局部边界。",
-    "如果语料不足，直接说明缺口，并建议需要导入哪些记录或全文。",
-    "回答默认用中文，保持短、准、可执行。",
-    `语料概览：总计 ${profile.summary.total} 条；第一作者 ${profile.summary.firstAuthor} 条；通讯作者 ${profile.summary.correspondingAuthor} 条。`,
-    "本地蒸馏地图：",
+    "You are AI Prof. Chai, a research trajectory and academic planning assistant.",
+    "Your task is to help users understand Prof. Chai's paper corpus, research themes, concept evolution, methodological lineage, and evidence-bounded research judgments.",
+    "Answer only from the user's question and the local Web of Science corpus context below. Do not fabricate papers, years, DOIs, citations, or full-text details.",
+    "Do not impersonate Prof. Chai or imply that the answer represents the real person's view.",
+    "Use the local distillation map as a route map. If the user asks about themes, periods, evolution, or distillation, organize the answer around it.",
+    "Local PDF full texts are split into question-matched evidence chunks. Prioritize these chunks when they are relevant, and do not treat the entire paper as equally supporting evidence.",
+    "When using PDF evidence, cite Evidence ID, year, and paper title. If the evidence only supports a partial judgment, state that boundary directly.",
+    "If the corpus is insufficient, explain the gap and suggest which records or full texts need to be added.",
+    "Answer in the user's language; default to English when the user's language is unclear. Keep the answer concise, precise, and actionable.",
+    `Corpus overview: ${profile.summary.total} total records; ${profile.summary.firstAuthor} first-author records; ${profile.summary.correspondingAuthor} corresponding-author records.`,
+    "Local distillation map:",
     distillationContext(distillation),
-    "本地 PDF 全文证据：",
+    "Local PDF full-text evidence:",
     pdfContext,
-    "相关语料：",
+    "Relevant corpus records:",
     context
   ].join("\n");
 }
@@ -671,21 +671,21 @@ export async function answerWithAssistant(
       await assertProviderBalance(config, token);
       remaining = claimQuota(config);
     } catch (error) {
-      lastError = error instanceof Error ? error.message : "模型余额或本地额度检查失败。";
+      lastError = error instanceof Error ? error.message : "Model balance or local quota check failed.";
       continue;
     }
 
     const response = await postChatCompletion(config, token, requestMessages, config.maxTokens, config.temperature);
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      lastError = `${config.provider} token ${index + 1}/${config.tokens.length} 返回 HTTP ${response.status}${body ? `：${body.slice(0, 160)}` : ""}`;
+      lastError = `${config.provider} token ${index + 1}/${config.tokens.length} returned HTTP ${response.status}${body ? `: ${body.slice(0, 160)}` : ""}`;
       if (retryWithNextToken(response.status)) continue;
       break;
     }
 
     const payload = (await response.json()) as ChatCompletionResponse;
     const content = payload.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error(`${config.provider} 返回格式无法解析。`);
+    if (!content) throw new Error(`${config.provider} returned an unreadable response format.`);
 
     return {
       message: {
@@ -700,5 +700,5 @@ export async function answerWithAssistant(
     };
   }
 
-  throw new Error(lastError || `${config.provider} 所有 token 均不可用。`);
+  throw new Error(lastError || `All ${config.provider} tokens are unavailable.`);
 }

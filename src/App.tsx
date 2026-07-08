@@ -1,15 +1,10 @@
 import {
-  Bot,
-  CheckCircle2,
   Clipboard,
-  Database,
   FileDown,
   FileQuestion,
   KeyRound,
-  MessageCircle,
   RefreshCw,
   Send,
-  Sparkles,
   Trash2,
   Upload
 } from "lucide-react";
@@ -53,47 +48,47 @@ const conversationsKey = "ai-prof-chai-conversations-v1";
 const activeConversationKey = "ai-prof-chai-active-conversation-v1";
 
 const modeOptions: Array<{ id: ResearchMode; title: string; copy: string }> = [
-  { id: "research-design", title: "研究设计", copy: "变量、模型、方法路径" },
-  { id: "theory-frame", title: "理论框架", copy: "概念边界与机制" },
-  { id: "literature-position", title: "文献定位", copy: "贡献、缺口、议程" },
-  { id: "writing-feedback", title: "写作反馈", copy: "段落、标题、表达" }
+  { id: "research-design", title: "Research Design", copy: "Variables, models, methods" },
+  { id: "theory-frame", title: "Theory Framing", copy: "Concept boundaries, mechanisms" },
+  { id: "literature-position", title: "Literature Positioning", copy: "Contributions, gaps, agenda" },
+  { id: "writing-feedback", title: "Writing Feedback", copy: "Paragraphs, titles, wording" }
 ];
 
 const workflowTemplates: Record<WorkflowId, { mode: ResearchMode; label: string; copy: string; prompt: string }> = {
   "research-matrix": {
     mode: "research-design",
-    label: "研究矩阵",
-    copy: "对象 × 产出类型",
+    label: "Research Matrix",
+    copy: "Object x output type",
     prompt:
-      "请作为 AI 蔡老师，基于蔡老师论文语料，把下面的研究方向拆成“对象 × 产出类型”的研究矩阵。\n\n研究方向：\n\n输出请包括：一句话结论、研究矩阵表、3 个可写 paper 方向、下一步行动、证据边界。"
+      "Act as AI Prof. Chai. Based on Prof. Chai's paper corpus, turn the following research direction into an object x output-type research matrix.\n\nResearch direction:\n\nPlease include: one-sentence takeaway, research matrix table, three paperable directions, next actions, and evidence boundaries."
   },
   "concept-boundary": {
     mode: "theory-frame",
-    label: "概念边界",
-    copy: "定义、区分、测量",
+    label: "Concept Boundary",
+    copy: "Define, separate, measure",
     prompt:
-      "请作为 AI 蔡老师，基于蔡老师论文语料，帮我区分下面概念的边界，并说明如何定义、测量和写进论文。\n\n概念：\n\n输出请包括：定义对照表、边界判断、测量建议、可引用语料依据、证据边界。"
+      "Act as AI Prof. Chai. Based on Prof. Chai's paper corpus, help me clarify the boundary of the following concept and explain how to define, measure, and write it into a paper.\n\nConcept:\n\nPlease include: definition comparison table, boundary judgment, measurement suggestions, corpus evidence, and evidence boundaries."
   },
   "variable-model": {
     mode: "research-design",
-    label: "变量模型",
-    copy: "机制、假设、方法",
+    label: "Variable Model",
+    copy: "Mechanisms, hypotheses, methods",
     prompt:
-      "请作为 AI 蔡老师，把下面的研究想法转成变量模型、机制路径、假设草案和方法建议。\n\n研究想法：\n\n输出请包括：变量表、机制路径、假设草案、方法建议、注意风险。"
+      "Act as AI Prof. Chai. Turn the following research idea into a variable model, mechanism pathway, draft hypotheses, and method suggestions.\n\nResearch idea:\n\nPlease include: variable table, mechanism pathway, draft hypotheses, method suggestions, and key risks."
   },
   "paper-pipeline": {
     mode: "literature-position",
-    label: "论文序列",
-    copy: "1/3/5 年 pipeline",
+    label: "Paper Pipeline",
+    copy: "1/3/5-year plan",
     prompt:
-      "请作为 AI 蔡老师，为下面的研究方向设计一个 1 年 / 3 年 / 5 年论文序列。\n\n研究方向：\n\n输出请包括：时间线表、每篇 paper 的理论/方法/贡献、可积累资产、证据边界。"
+      "Act as AI Prof. Chai. Design a 1-year / 3-year / 5-year paper pipeline for the following research direction.\n\nResearch direction:\n\nPlease include: timeline table, theory/method/contribution for each paper, cumulative research assets, and evidence boundaries."
   },
   "paragraph-feedback": {
     mode: "writing-feedback",
-    label: "段落反馈",
-    copy: "诊断、改写、保留",
+    label: "Paragraph Feedback",
+    copy: "Diagnose, revise, retain",
     prompt:
-      "请作为 AI 蔡老师，诊断并改写下面的论文段落。请指出逻辑问题、哪些内容保留、哪些需要删改。\n\n段落：\n\n输出请包括：问题诊断表、改写版本、可保留内容、需删除或弱化内容。"
+      "Act as AI Prof. Chai. Diagnose and revise the following paper paragraph. Point out logic issues, what to retain, and what to remove or weaken.\n\nParagraph:\n\nPlease include: problem diagnosis table, revised version, content to retain, and content to remove or soften."
   }
 };
 
@@ -102,7 +97,7 @@ const defaultMessages: MentorMessage[] = [
     id: "assistant-welcome",
     role: "assistant",
     content:
-      "你好，我是 AI 蔡老师，一个基于蔡老师论文语料整理的科研导师助手。你可以把研究 idea、论文段落、变量想法或追问发给我。"
+      "Hi, I am AI Prof. Chai, a research mentor assistant grounded in Prof. Chai's paper corpus. Send me a research idea, paragraph draft, variable model, or follow-up question."
   }
 ];
 
@@ -162,27 +157,27 @@ function shortTitle(text: string) {
 }
 
 function roleLabel(role: ChatMessage["role"]) {
-  return role === "user" ? "You" : "AI 蔡老师";
+  return role === "user" ? "You" : "AI Prof. Chai";
 }
 
 function formatTime(value: number) {
   try {
-    return new Intl.DateTimeFormat("zh-Hans", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(value);
+    return new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(value);
   } catch {
     return "";
   }
 }
 
 function providerLabel(status: AssistantStatus | null) {
-  if (!status?.configured) return "本地规则";
+  if (!status?.configured) return "Local rules";
   if (status.provider === "modelscope") {
     const model = status.model.split("/").pop()?.replace(/-/g, " ") || status.model;
-    return `魔搭 · ${model}`;
+    return `ModelScope · ${model}`;
   }
   if (status.provider === "deepseek") {
     return status.model.replace("deepseek-", "DeepSeek ").replace("v4", "V4").replace("-pro", " Pro").replace("-flash", " Flash");
   }
-  if (status.provider === "dashscope") return `百炼 · ${status.model}`;
+  if (status.provider === "dashscope") return `Bailian · ${status.model}`;
   return status.model;
 }
 
@@ -304,8 +299,8 @@ export default function App() {
   const [assistantStatus, setAssistantStatus] = useState<AssistantStatus | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeConversationId, setActiveConversationId] = useState(() => loadActiveId() || conversations[0]?.id || "");
-  const [input, setInput] = useState("帮我看看蔡老师论文里，哪些研究主线最适合整理成 AI 蔡老师的导师知识结构");
-  const [status, setStatus] = useState("正在读取论文语料");
+  const [input, setInput] = useState("Help me identify which research strands in Prof. Chai's papers are most suitable for building AI Prof. Chai's mentor knowledge structure.");
+  const [status, setStatus] = useState("Reading paper corpus");
   const [sending, setSending] = useState(false);
   const [refreshingPdfs, setRefreshingPdfs] = useState(false);
   const [uploadingPdfs, setUploadingPdfs] = useState(false);
@@ -338,7 +333,7 @@ export default function App() {
   };
 
   const load = async () => {
-    setStatus("正在刷新语料");
+    setStatus("Refreshing corpus");
     try {
       const [nextProfile, nextAssistantStatus, nextDistillation, nextFullTextStatus, nextPdfAuditStatus, nextMissingPdfQueue] = await Promise.all([
         fetchProfile(),
@@ -354,9 +349,9 @@ export default function App() {
       setFullTextStatus(nextFullTextStatus);
       setPdfAuditStatus(nextPdfAuditStatus);
       setMissingPdfQueue(nextMissingPdfQueue);
-      setStatus(nextProfile.summary.total ? "蔡老师论文语料已载入" : "等待 WoS 导出文件");
+      setStatus(nextProfile.summary.total ? "Paper corpus ready" : "Waiting for WoS export");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "接口不可用");
+      setStatus(error instanceof Error ? error.message : "API unavailable");
     }
   };
 
@@ -393,9 +388,9 @@ export default function App() {
   const copyMessage = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setStatus("回答已复制");
+      setStatus("Reply copied");
     } catch {
-      setStatus("复制失败，请手动选择文本");
+      setStatus("Copy failed. Please select the text manually.");
     }
   };
 
@@ -407,7 +402,7 @@ export default function App() {
     const loadingMessage: MentorMessage = {
       id: `assistant-loading-${Date.now()}`,
       role: "assistant",
-      content: "正在匹配本地论文语料，并生成研究分析...",
+      content: "Matching the paper corpus and drafting a research analysis...",
       loading: true
     };
     const nextMessages = [...messages.filter((message) => !message.loading), userMessage];
@@ -417,7 +412,7 @@ export default function App() {
     });
     setInput("");
     setSending(true);
-    setStatus("AI 蔡老师正在回答");
+    setStatus("AI Prof. Chai is answering");
 
     try {
       const result = await requestAssistantReply(stripMessages(nextMessages));
@@ -436,20 +431,20 @@ export default function App() {
             }
           : current
       );
-      setStatus("AI 蔡老师已回复");
+      setStatus("AI Prof. Chai replied");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "AI 蔡老师暂时不可用";
+      const message = error instanceof Error ? error.message : "AI Prof. Chai is temporarily unavailable";
       updateActiveConversation({
         messages: [
           ...nextMessages,
           {
             id: `assistant-error-${Date.now()}`,
             role: "assistant",
-            content: `模型暂时没接上：${message}\n\n没关系，你可以先用本地规则继续；如果要接魔搭免费 token，在左侧保存到本机就可以。`
+            content: `The model is not connected yet: ${message}\n\nYou can continue with local rules for now. To use a ModelScope free token in the local version, save it from the left panel.`
           }
         ]
       });
-      setStatus("AI 蔡老师连接失败");
+      setStatus("AI Prof. Chai connection failed");
     } finally {
       setSending(false);
     }
@@ -459,19 +454,19 @@ export default function App() {
     event.preventDefault();
     const token = assistantToken.trim();
     if (!token) {
-      setStatus("请先粘贴魔搭 token");
+      setStatus("Please paste a ModelScope token first");
       return;
     }
 
     setSavingToken(true);
-    setStatus("正在保存到本机");
+    setStatus("Saving locally");
     try {
       setAssistantStatus(await configureAssistantToken(token));
       setAssistantToken("");
-      setAssistantCheckMessage("已经安全保存到本机，可以试一下连接。");
-      setStatus("魔搭 token 已保存到本机");
+      setAssistantCheckMessage("Saved locally. You can test the connection now.");
+      setStatus("ModelScope token saved locally");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "保存没有成功");
+      setStatus(error instanceof Error ? error.message : "Save failed");
     } finally {
       setSavingToken(false);
     }
@@ -480,7 +475,7 @@ export default function App() {
   const testAiConnection = async () => {
     if (checkingAi) return;
     setCheckingAi(true);
-    setStatus("正在轻轻试一下魔搭连接");
+    setStatus("Testing ModelScope connection");
     try {
       const result = await checkAssistantConnection();
       setAssistantCheckMessage(result.message);
@@ -494,9 +489,9 @@ export default function App() {
             }
           : current
       );
-      setStatus(result.ok ? "魔搭连接已经准备好" : "魔搭连接还没有通过");
+      setStatus(result.ok ? "ModelScope connection ready" : "ModelScope check did not pass");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "魔搭连接暂时没有检查成功";
+      const message = error instanceof Error ? error.message : "ModelScope connection check failed";
       setAssistantCheckMessage(message);
       setStatus(message);
     } finally {
@@ -507,13 +502,13 @@ export default function App() {
   const scanDownloadedPdfs = async () => {
     if (refreshingPdfs) return;
     setRefreshingPdfs(true);
-    setStatus("正在扫描下载并刷新语料");
+    setStatus("Scanning downloads and refreshing corpus");
     try {
       const result = await refreshDownloadedPdfs();
       await load();
       setStatus(result.message);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "扫描下载失败");
+      setStatus(error instanceof Error ? error.message : "Download scan failed");
     } finally {
       setRefreshingPdfs(false);
     }
@@ -525,7 +520,7 @@ export default function App() {
     if (!files.length || uploadingPdfs) return;
 
     setUploadingPdfs(true);
-    setStatus(`正在上传 ${files.length} 个 PDF`);
+    setStatus(`Uploading ${files.length} PDF(s)`);
     try {
       let savedTotal = 0;
       let lastMessage = "";
@@ -535,9 +530,9 @@ export default function App() {
         lastMessage = result.message;
       }
       await load();
-      setStatus(savedTotal > 0 ? `已上传并匹配 ${savedTotal} 篇目标 PDF` : lastMessage || "PDF 已上传，但没有匹配到新的目标论文");
+      setStatus(savedTotal > 0 ? `Uploaded and matched ${savedTotal} target PDF(s)` : lastMessage || "PDF uploaded, but no new target paper was matched");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "PDF 上传失败");
+      setStatus(error instanceof Error ? error.message : "PDF upload failed");
     } finally {
       setUploadingPdfs(false);
     }
@@ -546,8 +541,8 @@ export default function App() {
   const indexedPdfCount = fullTextStatus?.summary.available ? fullTextStatus.summary.indexed : 0;
   const evidenceChunkCount = fullTextStatus?.summary.available ? fullTextStatus.summary.evidenceChunks || 0 : 0;
   const corpusLine = profile
-    ? `${profile.summary.pdfSaved} 篇 PDF · ${indexedPdfCount} 篇全文 · ${evidenceChunkCount} 条证据片段`
-    : "正在读取本地论文语料";
+    ? `${profile.summary.pdfSaved} PDFs · ${indexedPdfCount} full texts · ${evidenceChunkCount} evidence chunks`
+    : "Reading local paper corpus";
   const deferredPdfCount = profile?.summary.pdfNeeded || missingPdfQueue?.summary.count || 0;
   const activePdfCount = profile?.summary.pdfSaved || 0;
   const activeWorkflow = currentWorkflow ? workflowTemplates[currentWorkflow] : null;
@@ -559,23 +554,23 @@ export default function App() {
       <aside className="workspace-sidebar">
         <div className="brand-block">
           <div className="brand-mark" aria-hidden="true">
-            蔡
+            C
           </div>
           <div>
-            <h1>AI 蔡老师</h1>
-            <p>研究导师工作台</p>
+            <h1>AI Prof. Chai</h1>
+            <p>Research Mentor Workspace</p>
           </div>
         </div>
 
-        <section className="sidebar-section status-section" aria-label="模型状态">
+        <section className="sidebar-section status-section" aria-label="Model status">
           <div className="section-heading">
-            <h2>模型状态</h2>
+            <h2>Model Status</h2>
             <span className={`status-dot ${statusOk ? "ok" : "missing"}`} aria-hidden="true"></span>
           </div>
           <p className={`key-status ${statusOk ? "ok" : "missing"}`}>
             {assistantStatus?.configured
-              ? `${publicWorkerMode ? "魔搭 Worker" : "魔搭"} 已准备好 · 今日余量 ${assistantStatus.quotaLabel}`
-              : "还没有接入魔搭 token"}
+              ? `${publicWorkerMode ? "ModelScope Worker" : "ModelScope"} ready · today left ${assistantStatus.quotaLabel}`
+              : "ModelScope token not connected yet"}
           </p>
           <p className="corpus-line">{corpusLine}</p>
           {!publicWorkerMode ? (
@@ -587,40 +582,40 @@ export default function App() {
                   type="password"
                   value={assistantToken}
                   onChange={(event) => setAssistantToken(event.target.value)}
-                  placeholder="魔搭 token（本机保存）"
+                  placeholder="ModelScope token (local only)"
                   autoComplete="off"
                 />
               </label>
               <div className="key-actions">
                 <button type="submit" disabled={savingToken || !assistantToken.trim()}>
-                  {savingToken ? "保存中" : "保存到本机"}
+                  {savingToken ? "Saving" : "Save locally"}
                 </button>
                 <button type="button" onClick={testAiConnection} disabled={checkingAi}>
-                  {checkingAi ? "试用中" : "试一下"}
+                  {checkingAi ? "Testing" : "Test"}
                 </button>
               </div>
             </form>
           ) : null}
           <p className="security-note">
             {publicWorkerMode
-              ? "公开版通过受保护 Worker 调用模型；每个浏览器都有独立访客身份，token 不进入 GitHub。"
-              : "Token 只留在这台电脑的 .env.local，不会写进聊天记录；我已帮你设好每日 50 次保护线。"}
+              ? "The public app calls the model through a protected Worker. Each browser has its own anonymous visitor identity, and the token never enters GitHub."
+              : "The token stays on this computer in .env.local, never in chat history. A local 50-call daily guard is enabled."}
           </p>
           {assistantCheckMessage ? <p className="compact-feedback">{assistantCheckMessage}</p> : null}
         </section>
 
-        <section className="sidebar-section account-section" aria-label="正在使用的语料">
-          <h2>正在使用的语料</h2>
-          <p className="user-badge">蔡老师论文语料</p>
+        <section className="sidebar-section account-section" aria-label="Active corpus">
+          <h2>Active Corpus</h2>
+          <p className="user-badge">Prof. Chai paper corpus</p>
           <button className="logout-button" type="button" onClick={load}>
-            刷新语料
+            Refresh corpus
           </button>
         </section>
 
-        <section className="sidebar-section conversation-section" aria-label="会话记录">
+        <section className="sidebar-section conversation-section" aria-label="Conversation history">
           <div className="section-heading">
-            <h2>会话记录</h2>
-            <button className="mini-button" type="button" onClick={createConversation} aria-label="新建会话">
+            <h2>Conversation History</h2>
+            <button className="mini-button" type="button" onClick={createConversation} aria-label="New conversation">
               New
             </button>
           </div>
@@ -642,7 +637,7 @@ export default function App() {
                     event.stopPropagation();
                     deleteConversation(conversation.id);
                   }}
-                  aria-label="删除会话"
+                  aria-label="Delete conversation"
                   role="button"
                 >
                   <Trash2 size={13} />
@@ -652,8 +647,8 @@ export default function App() {
           </div>
         </section>
 
-        <section className="sidebar-section" aria-label="回答模式">
-          <h2>研究模式</h2>
+        <section className="sidebar-section mode-section" aria-label="Research modes">
+          <h2>Research Modes</h2>
           <div className="mode-grid">
             {modeOptions.map((option) => (
               <button
@@ -669,8 +664,8 @@ export default function App() {
           </div>
         </section>
 
-        <section className="sidebar-section" aria-label="研究工具包">
-          <h2>研究工具包</h2>
+        <section className="sidebar-section workflow-section" aria-label="Research toolkit">
+          <h2>Research Toolkit</h2>
           <div className="workflow-grid">
             {(Object.keys(workflowTemplates) as WorkflowId[]).map((workflow) => (
               <button
@@ -686,54 +681,54 @@ export default function App() {
           </div>
         </section>
 
-        <section className="sidebar-section" aria-label="知识底座">
-          <h2>知识底座</h2>
+        <section className="sidebar-section knowledge-section" aria-label="Knowledge base">
+          <h2>Knowledge Base</h2>
           <dl className="stat-list">
             <div>
-              <dt>本地 PDF</dt>
+              <dt>Local PDFs</dt>
               <dd>{profile?.summary.pdfSaved || 0}</dd>
             </div>
             <div>
-              <dt>证据片段</dt>
+              <dt>Evidence Chunks</dt>
               <dd>{evidenceChunkCount}</dd>
             </div>
             <div>
-              <dt>已索引全文</dt>
+              <dt>Indexed Full Texts</dt>
               <dd>{indexedPdfCount}</dd>
             </div>
             <div>
-              <dt>待补 PDF</dt>
+              <dt>Pending PDFs</dt>
               <dd>{deferredPdfCount}</dd>
             </div>
           </dl>
           <div className="tool-links">
             <a href="/api/project-status" target="_blank" rel="noreferrer">
-              项目状态
+              Project status
             </a>
             <a href="/api/evidence-pack/md" target="_blank" rel="noreferrer">
-              证据包
+              Evidence pack
             </a>
             <a href="/api/goal-audit" target="_blank" rel="noreferrer">
-              目标审计
+              Goal audit
             </a>
           </div>
         </section>
 
-        <section className="sidebar-section" aria-label="语料维护">
-          <h2>语料维护</h2>
+        <section className="sidebar-section maintenance-section" aria-label="Corpus maintenance">
+          <h2>Corpus Maintenance</h2>
           <input ref={pdfUploadInputRef} type="file" accept="application/pdf,.pdf" multiple hidden onChange={uploadSelectedPdfs} />
           <div className="maintenance-grid">
             <button type="button" onClick={scanDownloadedPdfs} disabled={refreshingPdfs}>
               <RefreshCw size={14} />
-              {refreshingPdfs ? "扫描中" : "扫描下载"}
+              {refreshingPdfs ? "Scanning" : "Scan downloads"}
             </button>
             <button type="button" onClick={() => pdfUploadInputRef.current?.click()} disabled={uploadingPdfs}>
               <Upload size={14} />
-              {uploadingPdfs ? "上传中" : "上传 PDF"}
+              {uploadingPdfs ? "Uploading" : "Upload PDFs"}
             </button>
             <a href="/api/missing-pdfs/download-pack" target="_blank" rel="noreferrer">
               <FileQuestion size={14} />
-              下载包
+              Download pack
             </a>
             <a href="/api/missing-pdfs/library-request/ris">
               <FileDown size={14} />
@@ -741,8 +736,8 @@ export default function App() {
             </a>
           </div>
           <p className="compact-feedback">
-            {distillation ? `${distillation.themes.length} 条主题线 · ${activePdfCount} 篇已入库 · ${evidenceChunkCount} 条证据片段` : status}
-            {pdfAuditStatus?.summary.available ? ` · 审计高可信 ${pdfAuditStatus.summary.high}` : ""}
+            {distillation ? `${distillation.themes.length} theme strands · ${activePdfCount} papers indexed · ${evidenceChunkCount} evidence chunks` : status}
+            {pdfAuditStatus?.summary.available ? ` · high-confidence audit ${pdfAuditStatus.summary.high}` : ""}
           </p>
         </section>
       </aside>
@@ -750,34 +745,19 @@ export default function App() {
       <main className="workbench">
         <header className="workbench-header">
           <div>
-            <p className="eyebrow">导师知识库</p>
-            <h2>AI 研究导师</h2>
+            <p className="eyebrow">Research Mentor Corpus</p>
+            <h2>AI Research Mentor</h2>
           </div>
           <div className="header-actions">
             <span className="model-pill">{providerLabel(assistantStatus)}</span>
-            <button className="clear-button" type="button" onClick={createConversation} aria-label="新建会话">
-              新建会话
+            <button className="clear-button" type="button" onClick={createConversation} aria-label="New conversation">
+              New conversation
             </button>
           </div>
         </header>
 
         <div className="workbench-body">
-          <section className="chat-session" aria-label="与 AI 蔡老师持续讨论科研问题">
-            <div className="session-strip" aria-label="当前证据层">
-              <span>
-                <strong>{profile?.summary.pdfSaved || 0}</strong>
-                PDF
-              </span>
-              <span>
-                <strong>{indexedPdfCount}</strong>
-                全文
-              </span>
-              <span>
-                <strong>{evidenceChunkCount}</strong>
-                证据片段
-              </span>
-              <span className={statusOk ? "strip-ok" : "strip-waiting"}>{statusOk ? "魔搭已准备好" : "先用本地规则"}</span>
-            </div>
+          <section className="chat-session" aria-label="Discuss research questions with AI Prof. Chai">
             <div className="message-list" aria-live="polite">
               {messages.map((message) => (
                 <article key={message.id} className={`message ${message.role}${message.loading ? " loading" : ""}`}>
@@ -786,14 +766,14 @@ export default function App() {
                     {message.role === "assistant" && !message.loading ? (
                       <button className="copy-button" type="button" onClick={() => void copyMessage(message.content)}>
                         <Clipboard size={12} />
-                        复制
+                        Copy
                       </button>
                     ) : null}
                   </div>
                   <div className="message-content" dangerouslySetInnerHTML={{ __html: formatMessageHtml(message.content) }} />
                   {message.citations?.length ? (
                     <div className="source-list">
-                      <span className="source-label">参考证据</span>
+                      <span className="source-label">Evidence used</span>
                       {message.citations.slice(0, 8).map((citation) => (
                         <span key={citation} className="source-chip">
                           {citation}
@@ -815,7 +795,7 @@ export default function App() {
               <label className="composer-label" htmlFor="messageInput">
                 Message
               </label>
-              {activeWorkflow ? <div className="workflow-chip">当前工具：{activeWorkflow.label}</div> : null}
+              {activeWorkflow ? <div className="workflow-chip">Current tool: {activeWorkflow.label}</div> : null}
               <textarea
                 id="messageInput"
                 rows={1}
@@ -827,11 +807,11 @@ export default function App() {
                     void send();
                   }
                 }}
-                placeholder="输入研究 idea、论文段落、变量想法或追问"
+                placeholder="Enter a research idea, paragraph, variable model, or follow-up"
               />
               <button type="submit" disabled={sending || !input.trim()}>
                 <Send size={16} />
-                发送
+                Send
               </button>
             </form>
           </section>

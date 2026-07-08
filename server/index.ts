@@ -192,16 +192,16 @@ function runRefreshPipeline(before: ReturnType<typeof refreshSnapshot>, noChange
     message:
       result.status === 0
         ? savedDelta > 0
-          ? `已接收 ${savedDelta} 篇新 PDF；还缺 ${after.missingTargetPdfs} 篇。`
+          ? `Received ${savedDelta} new PDF(s); ${after.missingTargetPdfs} still pending.`
           : noChangeMessage(after.missingTargetPdfs)
-        : `刷新失败：${(result.stderr || result.stdout || "unknown error").slice(0, 400)}`,
+        : `Refresh failed: ${(result.stderr || result.stdout || "unknown error").slice(0, 400)}`,
     reportPath: latestManualIngestReportPath()
   };
 }
 
 app.post("/api/pdfs/refresh", (_request, response) => {
   const before = refreshSnapshot();
-  const payload = runRefreshPipeline(before, (missing) => `已扫描下载目录；没有新增目标 PDF，还缺 ${missing} 篇。`);
+  const payload = runRefreshPipeline(before, (missing) => `Scanned downloads; no new target PDFs were matched. ${missing} still pending.`);
 
   if (!payload.ok) {
     response.status(500).json(payload);
@@ -233,7 +233,7 @@ function pdfBuffer(value: unknown) {
 app.post("/api/pdfs/upload", express.raw({ type: ["application/pdf", "application/octet-stream"], limit: "100mb" }), (request, response) => {
   const buffer = pdfBuffer(request.body);
   if (buffer.length < 5 || buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
-    response.status(400).json({ error: "请选择真实 PDF 文件。" });
+    response.status(400).json({ error: "Please choose a real PDF file." });
     return;
   }
 
@@ -246,7 +246,7 @@ app.post("/api/pdfs/upload", express.raw({ type: ["application/pdf", "applicatio
   const before = refreshSnapshot();
 
   fs.writeFileSync(uploadPath, buffer);
-  const payload = runRefreshPipeline(before, (missing) => `PDF 已放入待匹配区，但没有匹配到新的目标论文；还缺 ${missing} 篇。`) as PdfUploadResult;
+  const payload = runRefreshPipeline(before, (missing) => `The PDF was placed in the matching inbox, but no new target paper was matched. ${missing} still pending.`) as PdfUploadResult;
   payload.uploadedFile = path.relative(projectRoot, uploadPath);
 
   if (!payload.ok) {
@@ -360,13 +360,13 @@ function isLocalOrigin(origin?: string) {
 
 app.post("/api/assistant/config", (request, response) => {
   if (!isLocalOrigin(request.header("origin"))) {
-    response.status(403).json({ error: "只能从本地 AI 蔡老师页面保存 token。" });
+    response.status(403).json({ error: "Tokens can only be saved from the local AI Prof. Chai page." });
     return;
   }
 
   const tokens = parseApiTokens(String(request.body?.token || "")).filter((token) => token.length >= 8);
   if (!tokens.length) {
-    response.status(400).json({ error: "请输入有效的魔搭 ModelScope token。" });
+    response.status(400).json({ error: "Please enter a valid ModelScope token." });
     return;
   }
 
@@ -384,7 +384,7 @@ app.post("/api/assistant/config", (request, response) => {
 
 app.post("/api/assistant/check", async (request, response) => {
   if (!isLocalOrigin(request.header("origin"))) {
-    response.status(403).json({ error: "只能从本地 AI 蔡老师页面检查模型连接。" });
+    response.status(403).json({ error: "The model connection can only be checked from the local AI Prof. Chai page." });
     return;
   }
   response.json(await checkAssistantConnection());
@@ -398,7 +398,7 @@ app.post("/api/assistant/chat", async (request, response) => {
     );
   } catch (error) {
     response.status(502).json({
-      error: error instanceof Error ? error.message : "AI 蔡老师暂时不可用"
+      error: error instanceof Error ? error.message : "AI Prof. Chai is temporarily unavailable"
     });
   }
 });
@@ -412,5 +412,5 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.listen(port, host, () => {
-  console.log(`AI 蔡老师 API running at http://${host}:${port}`);
+  console.log(`AI Prof. Chai API running at http://${host}:${port}`);
 });
