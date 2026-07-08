@@ -46,6 +46,7 @@ type Conversation = {
 
 const conversationsKey = "ai-prof-chai-conversations-v1";
 const activeConversationKey = "ai-prof-chai-active-conversation-v1";
+const mobilePanelKey = "ai-prof-chai-mobile-panel-collapsed-v1";
 
 const modeOptions: Array<{ id: ResearchMode; title: string; copy: string }> = [
   { id: "research-design", title: "Research Design", copy: "Variables, models, methods" },
@@ -130,6 +131,15 @@ function loadActiveId() {
   }
 }
 
+function loadMobilePanelCollapsed() {
+  try {
+    const saved = localStorage.getItem(mobilePanelKey);
+    return saved === null ? true : saved === "true";
+  } catch {
+    return true;
+  }
+}
+
 function saveConversationState(conversations: Conversation[], activeId: string) {
   try {
     localStorage.setItem(conversationsKey, JSON.stringify(conversations));
@@ -144,6 +154,14 @@ function saveActiveConversationId(activeId: string) {
     localStorage.setItem(activeConversationKey, activeId);
   } catch {
     // The live session still works without local storage.
+  }
+}
+
+function saveMobilePanelCollapsed(collapsed: boolean) {
+  try {
+    localStorage.setItem(mobilePanelKey, collapsed ? "true" : "false");
+  } catch {
+    // The mobile panel still works for the current page without local storage.
   }
 }
 
@@ -308,6 +326,7 @@ export default function App() {
   const [checkingAi, setCheckingAi] = useState(false);
   const [assistantToken, setAssistantToken] = useState("");
   const [assistantCheckMessage, setAssistantCheckMessage] = useState("");
+  const [mobilePanelCollapsed, setMobilePanelCollapsedState] = useState(loadMobilePanelCollapsed);
   const pdfUploadInputRef = useRef<HTMLInputElement | null>(null);
 
   const activeConversation = useMemo(
@@ -373,6 +392,11 @@ export default function App() {
   const selectConversation = (id: string) => {
     setActiveConversationId(id);
     saveActiveConversationId(id);
+  };
+
+  const setMobilePanelCollapsed = (collapsed: boolean) => {
+    setMobilePanelCollapsedState(collapsed);
+    saveMobilePanelCollapsed(collapsed);
   };
 
   const setMode = (mode: ResearchMode) => {
@@ -550,7 +574,7 @@ export default function App() {
   const publicWorkerMode = Boolean(assistantStatus?.publicWorker);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${mobilePanelCollapsed ? "mobile-panel-collapsed" : ""}`}>
       <aside className="workspace-sidebar">
         <div className="brand-block">
           <div className="brand-mark" aria-hidden="true">
@@ -560,6 +584,14 @@ export default function App() {
             <h1>AI Prof. Chai</h1>
             <p>Research Mentor Workspace</p>
           </div>
+          <button
+            className="mobile-panel-toggle"
+            type="button"
+            aria-expanded={!mobilePanelCollapsed}
+            onClick={() => setMobilePanelCollapsed(!mobilePanelCollapsed)}
+          >
+            {mobilePanelCollapsed ? "Tools" : "Collapse"}
+          </button>
         </div>
 
         <section className="sidebar-section status-section" aria-label="Model status">
