@@ -9,8 +9,6 @@ const KEY_PREFIX = "chai:";
 
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://jojo-edtech.github.io",
-  "https://ai-prof-chai.pages.dev",
-  "https://999bf792.ai-prof-chai.pages.dev",
   "http://localhost:5178",
   "http://127.0.0.1:5178",
   "http://localhost:8914",

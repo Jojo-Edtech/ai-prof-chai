@@ -11,7 +11,7 @@ MAX_REQUESTS_PER_DAY = "20"
 MAX_GLOBAL_REQUESTS_PER_DAY = "300"
 MODELSCOPE_FREE_DAILY_CALLS = "2000"
 MODELSCOPE_MAX_TOKENS = "1400"
-ALLOWED_ORIGINS = "https://jojo-edtech.github.io,https://ai-prof-chai.pages.dev,https://999bf792.ai-prof-chai.pages.dev,http://localhost:5178,http://127.0.0.1:5178,http://localhost:8914,http://127.0.0.1:8914"
+ALLOWED_ORIGINS = "https://jojo-edtech.github.io,http://localhost:5178,http://127.0.0.1:5178,http://localhost:8914,http://127.0.0.1:8914"
 
 [[kv_namespaces]]
 binding = "AI_PROF_CHAI_KV"
