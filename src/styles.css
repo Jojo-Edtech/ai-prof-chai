@@ -564,6 +564,7 @@ p {
 
 .maintenance-grid {
   grid-template-columns: 1fr 1fr;
+  gap: 7px;
 }
 
 .tool-links a,
@@ -572,16 +573,22 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-height: 36px;
-  padding: 0 10px;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
   background: var(--surface);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 760;
+  font-size: 12.5px;
+  font-weight: 820;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.maintenance-grid svg {
+  flex: 0 0 auto;
 }
 
 .tool-links a:hover,
@@ -595,6 +602,16 @@ p {
   cursor: progress;
   color: var(--quiet);
   background: var(--surface-soft);
+}
+
+.maintenance-section .compact-feedback {
+  margin-top: 9px;
+  padding: 9px 10px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.42;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compact-note p {

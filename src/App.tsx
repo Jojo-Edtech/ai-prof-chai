@@ -752,15 +752,15 @@ export default function App() {
           <div className="maintenance-grid">
             <button type="button" onClick={scanDownloadedPdfs} disabled={refreshingPdfs}>
               <RefreshCw size={14} />
-              {refreshingPdfs ? "Scanning" : "Scan downloads"}
+              {refreshingPdfs ? "Scanning" : "Scan"}
             </button>
             <button type="button" onClick={() => pdfUploadInputRef.current?.click()} disabled={uploadingPdfs}>
               <Upload size={14} />
-              {uploadingPdfs ? "Uploading" : "Upload PDFs"}
+              {uploadingPdfs ? "Uploading" : "Upload"}
             </button>
             <a href="/api/missing-pdfs/download-pack" target="_blank" rel="noreferrer">
               <FileQuestion size={14} />
-              Download pack
+              PDF pack
             </a>
             <a href="/api/missing-pdfs/library-request/ris">
               <FileDown size={14} />
@@ -768,8 +768,7 @@ export default function App() {
             </a>
           </div>
           <p className="compact-feedback">
-            {distillation ? `${distillation.themes.length} theme strands · ${activePdfCount} papers indexed · ${evidenceChunkCount} evidence chunks` : status}
-            {pdfAuditStatus?.summary.available ? ` · high-confidence audit ${pdfAuditStatus.summary.high}` : ""}
+            {distillation ? `${distillation.themes.length} strands · ${activePdfCount} papers · ${evidenceChunkCount.toLocaleString("en-US")} chunks` : status}
           </p>
         </section>
       </aside>
