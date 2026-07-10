@@ -157,6 +157,14 @@ function moveToTrash(source: string, reason: string): MoveRecord {
 
 function copyFile(source: string, destination: string) {
   mkdir(path.dirname(destination));
+  if (!fs.existsSync(destination)) {
+    try {
+      fs.linkSync(source, destination);
+      return;
+    } catch {
+      // Fall back when the desktop folder is on a different volume.
+    }
+  }
   fs.copyFileSync(source, destination);
 }
 
