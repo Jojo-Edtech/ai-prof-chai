@@ -3,6 +3,7 @@ import {
   FileDown,
   FileQuestion,
   KeyRound,
+  Languages,
   RefreshCw,
   Send,
   Trash2,
@@ -31,9 +32,16 @@ import type {
   MissingPdfQueue,
   PdfAuditStatus
 } from "./shared/types";
+import {
+  type Lang,
+  type ResearchMode,
+  type Strings,
+  type WorkflowId,
+  loadLang,
+  saveLang,
+  translations
+} from "./i18n";
 
-type ResearchMode = "research-design" | "theory-frame" | "literature-position" | "writing-feedback";
-type WorkflowId = "research-matrix" | "concept-boundary" | "variable-model" | "paper-pipeline" | "paragraph-feedback";
 type MentorMessage = ChatMessage & { loading?: boolean; citations?: string[] };
 type Conversation = {
   id: string;
@@ -48,57 +56,25 @@ const conversationsKey = "ai-prof-chai-conversations-v1";
 const activeConversationKey = "ai-prof-chai-active-conversation-v1";
 const mobilePanelKey = "ai-prof-chai-mobile-panel-collapsed-v1";
 
-const modeOptions: Array<{ id: ResearchMode; title: string; copy: string }> = [
-  { id: "research-design", title: "Research Design", copy: "Variables, models, methods" },
-  { id: "theory-frame", title: "Theory Framing", copy: "Concept boundaries, mechanisms" },
-  { id: "literature-position", title: "Literature Positioning", copy: "Contributions, gaps, agenda" },
-  { id: "writing-feedback", title: "Writing Feedback", copy: "Paragraphs, titles, wording" }
-];
+const modeOrder: ResearchMode[] = ["research-design", "theory-frame", "literature-position", "writing-feedback"];
 
-const workflowTemplates: Record<WorkflowId, { mode: ResearchMode; label: string; copy: string; prompt: string }> = {
-  "research-matrix": {
-    mode: "research-design",
-    label: "Research Matrix",
-    copy: "Object x output type",
-    prompt:
-      "Act as AI Prof. Chai. Based on Prof. Chai's paper corpus, turn the following research direction into an object x output-type research matrix.\n\nResearch direction:\n\nPlease include: one-sentence takeaway, research matrix table, three paperable directions, next actions, and evidence boundaries."
-  },
-  "concept-boundary": {
-    mode: "theory-frame",
-    label: "Concept Boundary",
-    copy: "Define, separate, measure",
-    prompt:
-      "Act as AI Prof. Chai. Based on Prof. Chai's paper corpus, help me clarify the boundary of the following concept and explain how to define, measure, and write it into a paper.\n\nConcept:\n\nPlease include: definition comparison table, boundary judgment, measurement suggestions, corpus evidence, and evidence boundaries."
-  },
-  "variable-model": {
-    mode: "research-design",
-    label: "Variable Model",
-    copy: "Mechanisms, hypotheses, methods",
-    prompt:
-      "Act as AI Prof. Chai. Turn the following research idea into a variable model, mechanism pathway, draft hypotheses, and method suggestions.\n\nResearch idea:\n\nPlease include: variable table, mechanism pathway, draft hypotheses, method suggestions, and key risks."
-  },
-  "paper-pipeline": {
-    mode: "literature-position",
-    label: "Paper Pipeline",
-    copy: "1/3/5-year plan",
-    prompt:
-      "Act as AI Prof. Chai. Design a 1-year / 3-year / 5-year paper pipeline for the following research direction.\n\nResearch direction:\n\nPlease include: timeline table, theory/method/contribution for each paper, cumulative research assets, and evidence boundaries."
-  },
-  "paragraph-feedback": {
-    mode: "writing-feedback",
-    label: "Paragraph Feedback",
-    copy: "Diagnose, revise, retain",
-    prompt:
-      "Act as AI Prof. Chai. Diagnose and revise the following paper paragraph. Point out logic issues, what to retain, and what to remove or weaken.\n\nParagraph:\n\nPlease include: problem diagnosis table, revised version, content to retain, and content to remove or soften."
-  }
+const workflowModes: Record<WorkflowId, ResearchMode> = {
+  "research-matrix": "research-design",
+  "concept-boundary": "theory-frame",
+  "variable-model": "research-design",
+  "paper-pipeline": "literature-position",
+  "paragraph-feedback": "writing-feedback"
 };
+
+const workflowOrder = Object.keys(workflowModes) as WorkflowId[];
+
+const welcomeMessageId = "assistant-welcome";
 
 const defaultMessages: MentorMessage[] = [
   {
-    id: "assistant-welcome",
+    id: welcomeMessageId,
     role: "assistant",
-    content:
-      "Hi, I am AI Prof. Chai, a research mentor assistant grounded in Prof. Chai's paper corpus. Send me a research idea, paragraph draft, variable model, or follow-up question."
+    content: translations.en.welcome
   }
 ];
 
@@ -174,20 +150,20 @@ function shortTitle(text: string) {
   return clean ? clean.slice(0, 34) : "New conversation";
 }
 
-function roleLabel(role: ChatMessage["role"]) {
-  return role === "user" ? "You" : "AI Prof. Chai";
+function roleLabel(role: ChatMessage["role"], t: Strings) {
+  return role === "user" ? t.you : "AI Prof. Chai";
 }
 
-function formatTime(value: number) {
+function formatTime(value: number, lang: Lang) {
   try {
-    return new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(value);
+    return new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(value);
   } catch {
     return "";
   }
 }
 
-function providerLabel(status: AssistantStatus | null) {
-  if (!status?.configured) return "Local rules";
+function providerLabel(status: AssistantStatus | null, t: Strings) {
+  if (!status?.configured) return t.localRules;
   if (status.provider === "modelscope") {
     const model = status.model.split("/").pop()?.replace(/-/g, " ") || status.model;
     return `ModelScope · ${model}`;
@@ -309,6 +285,8 @@ function formatMessageHtml(text: string) {
 }
 
 export default function App() {
+  const [lang, setLangState] = useState<Lang>(loadLang);
+  const t = translations[lang];
   const [profile, setProfile] = useState<CorpusProfile | null>(null);
   const [distillation, setDistillation] = useState<DistillationProfile | null>(null);
   const [fullTextStatus, setFullTextStatus] = useState<FullTextStatus | null>(null);
@@ -318,7 +296,7 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeConversationId, setActiveConversationId] = useState(() => loadActiveId() || conversations[0]?.id || "");
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState("Reading paper corpus");
+  const [status, setStatus] = useState(() => translations[loadLang()].statusReading);
   const [sending, setSending] = useState(false);
   const [refreshingPdfs, setRefreshingPdfs] = useState(false);
   const [uploadingPdfs, setUploadingPdfs] = useState(false);
@@ -351,8 +329,18 @@ export default function App() {
     persistConversations(nextConversations, activeConversation?.id || activeConversationId);
   };
 
+  const toggleLang = () => {
+    const next: Lang = lang === "en" ? "zh" : "en";
+    setLangState(next);
+    saveLang(next);
+  };
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  }, [lang]);
+
   const load = async () => {
-    setStatus("Refreshing corpus");
+    setStatus(t.statusRefreshing);
     try {
       const [nextProfile, nextAssistantStatus, nextDistillation, nextFullTextStatus, nextPdfAuditStatus, nextMissingPdfQueue] = await Promise.all([
         fetchProfile(),
@@ -368,9 +356,9 @@ export default function App() {
       setFullTextStatus(nextFullTextStatus);
       setPdfAuditStatus(nextPdfAuditStatus);
       setMissingPdfQueue(nextMissingPdfQueue);
-      setStatus(nextProfile.summary.total ? "Paper corpus ready" : "Waiting for WoS export");
+      setStatus(nextProfile.summary.total ? t.statusReady : t.statusWaitingWos);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "API unavailable");
+      setStatus(error instanceof Error ? error.message : t.statusApiUnavailable);
     }
   };
 
@@ -404,17 +392,16 @@ export default function App() {
   };
 
   const applyWorkflow = (workflow: WorkflowId) => {
-    const template = workflowTemplates[workflow];
-    updateActiveConversation({ mode: template.mode, workflow });
-    setInput(template.prompt);
+    updateActiveConversation({ mode: workflowModes[workflow], workflow });
+    setInput(t.workflows[workflow].prompt);
   };
 
   const copyMessage = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setStatus("Reply copied");
+      setStatus(t.statusCopied);
     } catch {
-      setStatus("Copy failed. Please select the text manually.");
+      setStatus(t.statusCopyFailed);
     }
   };
 
@@ -426,7 +413,7 @@ export default function App() {
     const loadingMessage: MentorMessage = {
       id: `assistant-loading-${Date.now()}`,
       role: "assistant",
-      content: "Matching the paper corpus and drafting a research analysis...",
+      content: t.loadingReply,
       loading: true
     };
     const nextMessages = [...messages.filter((message) => !message.loading), userMessage];
@@ -436,7 +423,7 @@ export default function App() {
     });
     setInput("");
     setSending(true);
-    setStatus("AI Prof. Chai is answering");
+    setStatus(t.statusAnswering);
 
     try {
       const result = await requestAssistantReply(stripMessages(nextMessages));
@@ -455,20 +442,20 @@ export default function App() {
             }
           : current
       );
-      setStatus("AI Prof. Chai replied");
+      setStatus(t.statusReplied);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "AI Prof. Chai is temporarily unavailable";
+      const message = error instanceof Error ? error.message : t.statusUnavailable;
       updateActiveConversation({
         messages: [
           ...nextMessages,
           {
             id: `assistant-error-${Date.now()}`,
             role: "assistant",
-            content: `The model is not connected yet: ${message}\n\nYou can continue with local rules for now. To use a ModelScope free token in the local version, save it from the left panel.`
+            content: t.errorReply(message)
           }
         ]
       });
-      setStatus("AI Prof. Chai connection failed");
+      setStatus(t.statusConnectionFailed);
     } finally {
       setSending(false);
     }
@@ -478,19 +465,19 @@ export default function App() {
     event.preventDefault();
     const token = assistantToken.trim();
     if (!token) {
-      setStatus("Please paste a ModelScope token first");
+      setStatus(t.statusPasteToken);
       return;
     }
 
     setSavingToken(true);
-    setStatus("Saving locally");
+    setStatus(t.statusSavingLocal);
     try {
       setAssistantStatus(await configureAssistantToken(token));
       setAssistantToken("");
-      setAssistantCheckMessage("Saved locally. You can test the connection now.");
-      setStatus("ModelScope token saved locally");
+      setAssistantCheckMessage(t.savedTestNow);
+      setStatus(t.statusTokenSaved);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Save failed");
+      setStatus(error instanceof Error ? error.message : t.statusSaveFailed);
     } finally {
       setSavingToken(false);
     }
@@ -499,7 +486,7 @@ export default function App() {
   const testAiConnection = async () => {
     if (checkingAi) return;
     setCheckingAi(true);
-    setStatus("Testing ModelScope connection");
+    setStatus(t.statusTestingConn);
     try {
       const result = await checkAssistantConnection();
       setAssistantCheckMessage(result.message);
@@ -513,9 +500,9 @@ export default function App() {
             }
           : current
       );
-      setStatus(result.ok ? "ModelScope connection ready" : "ModelScope check did not pass");
+      setStatus(result.ok ? t.statusConnReady : t.statusConnNotPass);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "ModelScope connection check failed";
+      const message = error instanceof Error ? error.message : t.statusConnCheckFailed;
       setAssistantCheckMessage(message);
       setStatus(message);
     } finally {
@@ -526,13 +513,13 @@ export default function App() {
   const scanDownloadedPdfs = async () => {
     if (refreshingPdfs) return;
     setRefreshingPdfs(true);
-    setStatus("Scanning downloads and refreshing corpus");
+    setStatus(t.statusScanningDownloads);
     try {
       const result = await refreshDownloadedPdfs();
       await load();
       setStatus(result.message);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Download scan failed");
+      setStatus(error instanceof Error ? error.message : t.statusScanFailed);
     } finally {
       setRefreshingPdfs(false);
     }
@@ -544,7 +531,7 @@ export default function App() {
     if (!files.length || uploadingPdfs) return;
 
     setUploadingPdfs(true);
-    setStatus(`Uploading ${files.length} PDF(s)`);
+    setStatus(t.statusUploadingN(files.length));
     try {
       let savedTotal = 0;
       let lastMessage = "";
@@ -554,9 +541,9 @@ export default function App() {
         lastMessage = result.message;
       }
       await load();
-      setStatus(savedTotal > 0 ? `Uploaded and matched ${savedTotal} target PDF(s)` : lastMessage || "PDF uploaded, but no new target paper was matched");
+      setStatus(savedTotal > 0 ? t.statusUploadedMatched(savedTotal) : lastMessage || t.statusUploadedNoMatch);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "PDF upload failed");
+      setStatus(error instanceof Error ? error.message : t.statusUploadFailed);
     } finally {
       setUploadingPdfs(false);
     }
@@ -564,12 +551,10 @@ export default function App() {
 
   const indexedPdfCount = fullTextStatus?.summary.available ? fullTextStatus.summary.indexed : 0;
   const evidenceChunkCount = fullTextStatus?.summary.available ? fullTextStatus.summary.evidenceChunks || 0 : 0;
-  const corpusLine = profile
-    ? `${profile.summary.pdfSaved} PDFs · ${indexedPdfCount} full texts · ${evidenceChunkCount} evidence chunks`
-    : "Reading local paper corpus";
+  const corpusLine = profile ? t.corpusLine(profile.summary.pdfSaved, indexedPdfCount, evidenceChunkCount) : t.corpusReading;
   const deferredPdfCount = profile?.summary.pdfNeeded || missingPdfQueue?.summary.count || 0;
   const activePdfCount = profile?.summary.pdfSaved || 0;
-  const activeWorkflow = currentWorkflow ? workflowTemplates[currentWorkflow] : null;
+  const activeWorkflow = currentWorkflow ? t.workflows[currentWorkflow] : null;
   const statusOk = Boolean(assistantStatus?.configured);
   const publicWorkerMode = Boolean(assistantStatus?.publicWorker);
 
@@ -582,7 +567,7 @@ export default function App() {
           </div>
           <div>
             <h1>AI Prof. Chai</h1>
-            <p>Research Mentor Workspace</p>
+            <p>{t.brandSubtitle}</p>
           </div>
           <button
             className="mobile-panel-toggle"
@@ -590,19 +575,17 @@ export default function App() {
             aria-expanded={!mobilePanelCollapsed}
             onClick={() => setMobilePanelCollapsed(!mobilePanelCollapsed)}
           >
-            {mobilePanelCollapsed ? "Tools" : "Collapse"}
+            {mobilePanelCollapsed ? t.tools : t.collapse}
           </button>
         </div>
 
-        <section className="sidebar-section status-section" aria-label="Model status">
+        <section className="sidebar-section status-section" aria-label={t.modelStatus}>
           <div className="section-heading">
-            <h2>Model Status</h2>
+            <h2>{t.modelStatus}</h2>
             <span className={`status-dot ${statusOk ? "ok" : "missing"}`} aria-hidden="true"></span>
           </div>
           <p className={`key-status ${statusOk ? "ok" : "missing"}`}>
-            {assistantStatus?.configured
-              ? `${publicWorkerMode ? "ModelScope Worker" : "ModelScope"} ready · today left ${assistantStatus.quotaLabel}`
-              : "ModelScope token not connected yet"}
+            {assistantStatus?.configured ? t.modelReady(publicWorkerMode, assistantStatus.quotaLabel) : t.modelNotConnected}
           </p>
           <p className="corpus-line">{corpusLine}</p>
           {!publicWorkerMode ? (
@@ -614,41 +597,37 @@ export default function App() {
                   type="password"
                   value={assistantToken}
                   onChange={(event) => setAssistantToken(event.target.value)}
-                  placeholder="ModelScope token (local only)"
+                  placeholder={t.tokenPlaceholder}
                   autoComplete="off"
                 />
               </label>
               <div className="key-actions">
                 <button type="submit" disabled={savingToken || !assistantToken.trim()}>
-                  {savingToken ? "Saving" : "Save locally"}
+                  {savingToken ? t.saving : t.saveLocally}
                 </button>
                 <button type="button" onClick={testAiConnection} disabled={checkingAi}>
-                  {checkingAi ? "Testing" : "Test"}
+                  {checkingAi ? t.testing : t.test}
                 </button>
               </div>
             </form>
           ) : null}
-          <p className="security-note">
-            {publicWorkerMode
-              ? "The public app calls the model through a protected Worker. Each browser has its own anonymous visitor identity, and the token never enters GitHub."
-              : "The token stays on this computer in .env.local, never in chat history. A local 50-call daily guard is enabled."}
-          </p>
+          <p className="security-note">{publicWorkerMode ? t.securityPublic : t.securityLocal}</p>
           {assistantCheckMessage ? <p className="compact-feedback">{assistantCheckMessage}</p> : null}
         </section>
 
-        <section className="sidebar-section account-section" aria-label="Active corpus">
-          <h2>Active Corpus</h2>
-          <p className="user-badge">Prof. Chai paper corpus</p>
+        <section className="sidebar-section account-section" aria-label={t.activeCorpus}>
+          <h2>{t.activeCorpus}</h2>
+          <p className="user-badge">{t.corpusBadge}</p>
           <button className="logout-button" type="button" onClick={load}>
-            Refresh corpus
+            {t.refreshCorpus}
           </button>
         </section>
 
-        <section className="sidebar-section conversation-section" aria-label="Conversation history">
+        <section className="sidebar-section conversation-section" aria-label={t.conversationHistory}>
           <div className="section-heading">
-            <h2>Conversation History</h2>
-            <button className="mini-button" type="button" onClick={createConversation} aria-label="New conversation">
-              New
+            <h2>{t.conversationHistory}</h2>
+            <button className="mini-button" type="button" onClick={createConversation} aria-label={t.newConversation}>
+              {t.newShort}
             </button>
           </div>
           <div className="conversation-list">
@@ -659,9 +638,9 @@ export default function App() {
                 type="button"
                 onClick={() => selectConversation(conversation.id)}
               >
-                <span className="conversation-title">{conversation.title}</span>
+                <span className="conversation-title">{conversation.title === "New conversation" ? t.newConversation : conversation.title}</span>
                 <span className="conversation-meta">
-                  {conversation.messages.filter((message) => !message.loading).length} messages · {formatTime(conversation.updatedAt)}
+                  {t.messagesCount(conversation.messages.filter((message) => !message.loading).length)} · {formatTime(conversation.updatedAt, lang)}
                 </span>
                 <span
                   className="conversation-delete"
@@ -669,7 +648,7 @@ export default function App() {
                     event.stopPropagation();
                     deleteConversation(conversation.id);
                   }}
-                  aria-label="Delete conversation"
+                  aria-label={t.deleteConversation}
                   role="button"
                 >
                   <Trash2 size={13} />
@@ -679,88 +658,88 @@ export default function App() {
           </div>
         </section>
 
-        <section className="sidebar-section mode-section" aria-label="Research modes">
-          <h2>Research Modes</h2>
+        <section className="sidebar-section mode-section" aria-label={t.researchModes}>
+          <h2>{t.researchModes}</h2>
           <div className="mode-grid">
-            {modeOptions.map((option) => (
+            {modeOrder.map((mode) => (
               <button
-                key={option.id}
-                className={`mode-button ${currentMode === option.id ? "active" : ""}`}
+                key={mode}
+                className={`mode-button ${currentMode === mode ? "active" : ""}`}
                 type="button"
-                onClick={() => setMode(option.id)}
+                onClick={() => setMode(mode)}
               >
-                <span className="mode-title">{option.title}</span>
-                <span className="mode-copy">{option.copy}</span>
+                <span className="mode-title">{t.modes[mode].title}</span>
+                <span className="mode-copy">{t.modes[mode].copy}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="sidebar-section workflow-section" aria-label="Research toolkit">
-          <h2>Research Toolkit</h2>
+        <section className="sidebar-section workflow-section" aria-label={t.researchToolkit}>
+          <h2>{t.researchToolkit}</h2>
           <div className="workflow-grid">
-            {(Object.keys(workflowTemplates) as WorkflowId[]).map((workflow) => (
+            {workflowOrder.map((workflow) => (
               <button
                 key={workflow}
                 className={`workflow-button ${currentWorkflow === workflow ? "active" : ""}`}
                 type="button"
                 onClick={() => applyWorkflow(workflow)}
               >
-                <span className="workflow-title">{workflowTemplates[workflow].label}</span>
-                <span className="workflow-copy">{workflowTemplates[workflow].copy}</span>
+                <span className="workflow-title">{t.workflows[workflow].label}</span>
+                <span className="workflow-copy">{t.workflows[workflow].copy}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="sidebar-section knowledge-section" aria-label="Knowledge base">
-          <h2>Knowledge Base</h2>
+        <section className="sidebar-section knowledge-section" aria-label={t.knowledgeBase}>
+          <h2>{t.knowledgeBase}</h2>
           <dl className="stat-list">
             <div>
-              <dt>Local PDFs</dt>
+              <dt>{t.localPdfs}</dt>
               <dd>{profile?.summary.pdfSaved || 0}</dd>
             </div>
             <div>
-              <dt>Evidence Chunks</dt>
+              <dt>{t.evidenceChunks}</dt>
               <dd>{evidenceChunkCount}</dd>
             </div>
             <div>
-              <dt>Indexed Full Texts</dt>
+              <dt>{t.indexedFullTexts}</dt>
               <dd>{indexedPdfCount}</dd>
             </div>
             <div>
-              <dt>Pending PDFs</dt>
+              <dt>{t.pendingPdfs}</dt>
               <dd>{deferredPdfCount}</dd>
             </div>
           </dl>
           <div className="tool-links">
             <a href="/api/project-status" target="_blank" rel="noreferrer">
-              Project status
+              {t.projectStatus}
             </a>
             <a href="/api/evidence-pack/md" target="_blank" rel="noreferrer">
-              Evidence pack
+              {t.evidencePack}
             </a>
             <a href="/api/goal-audit" target="_blank" rel="noreferrer">
-              Goal audit
+              {t.goalAudit}
             </a>
           </div>
         </section>
 
-        <section className="sidebar-section maintenance-section" aria-label="Corpus maintenance">
-          <h2>Corpus Maintenance</h2>
+        <section className="sidebar-section maintenance-section" aria-label={t.corpusMaintenance}>
+          <h2>{t.corpusMaintenance}</h2>
           <input ref={pdfUploadInputRef} type="file" accept="application/pdf,.pdf" multiple hidden onChange={uploadSelectedPdfs} />
           <div className="maintenance-grid">
             <button type="button" onClick={scanDownloadedPdfs} disabled={refreshingPdfs}>
               <RefreshCw size={14} />
-              {refreshingPdfs ? "Scanning" : "Scan"}
+              {refreshingPdfs ? t.scanning : t.scan}
             </button>
             <button type="button" onClick={() => pdfUploadInputRef.current?.click()} disabled={uploadingPdfs}>
               <Upload size={14} />
-              {uploadingPdfs ? "Uploading" : "Upload"}
+              {uploadingPdfs ? t.uploading : t.upload}
             </button>
             <a href="/api/missing-pdfs/download-pack" target="_blank" rel="noreferrer">
               <FileQuestion size={14} />
-              PDF pack
+              {t.pdfPack}
             </a>
             <a href="/api/missing-pdfs/library-request/ris">
               <FileDown size={14} />
@@ -768,7 +747,9 @@ export default function App() {
             </a>
           </div>
           <p className="compact-feedback">
-            {distillation ? `${distillation.themes.length} strands · ${activePdfCount} papers · ${evidenceChunkCount.toLocaleString("en-US")} chunks` : status}
+            {distillation
+              ? t.distillLine(distillation.themes.length, activePdfCount, evidenceChunkCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US"))
+              : status}
           </p>
         </section>
       </aside>
@@ -776,35 +757,47 @@ export default function App() {
       <main className="workbench">
         <header className="workbench-header">
           <div>
-            <p className="eyebrow">Research Mentor Corpus</p>
-            <h2>AI Research Mentor</h2>
+            <p className="eyebrow">{t.eyebrow}</p>
+            <h2>{t.headline}</h2>
           </div>
           <div className="header-actions">
-            <span className="model-pill">{providerLabel(assistantStatus)}</span>
-            <button className="clear-button" type="button" onClick={createConversation} aria-label="New conversation">
-              New conversation
+            <span className="model-pill">{providerLabel(assistantStatus, t)}</span>
+            <button
+              className="clear-button lang-toggle"
+              type="button"
+              onClick={toggleLang}
+              aria-label={lang === "en" ? "切换到中文" : "Switch to English"}
+            >
+              <Languages size={14} />
+              {lang === "en" ? "中文" : "EN"}
+            </button>
+            <button className="clear-button" type="button" onClick={createConversation} aria-label={t.newConversation}>
+              {t.newConversation}
             </button>
           </div>
         </header>
 
         <div className="workbench-body">
-          <section className="chat-session" aria-label="Discuss research questions with AI Prof. Chai">
+          <section className="chat-session" aria-label="AI Prof. Chai">
             <div className="message-list" aria-live="polite">
               {messages.map((message) => (
                 <article key={message.id} className={`message ${message.role}${message.loading ? " loading" : ""}`}>
                   <div className="message-header">
-                    <div className="message-role">{roleLabel(message.role)}</div>
+                    <div className="message-role">{roleLabel(message.role, t)}</div>
                     {message.role === "assistant" && !message.loading ? (
                       <button className="copy-button" type="button" onClick={() => void copyMessage(message.content)}>
                         <Clipboard size={12} />
-                        Copy
+                        {t.copy}
                       </button>
                     ) : null}
                   </div>
-                  <div className="message-content" dangerouslySetInnerHTML={{ __html: formatMessageHtml(message.content) }} />
+                  <div
+                    className="message-content"
+                    dangerouslySetInnerHTML={{ __html: formatMessageHtml(message.id === welcomeMessageId ? t.welcome : message.content) }}
+                  />
                   {message.citations?.length ? (
                     <div className="source-list">
-                      <span className="source-label">Evidence used</span>
+                      <span className="source-label">{t.evidenceUsed}</span>
                       {message.citations.slice(0, 8).map((citation) => (
                         <span key={citation} className="source-chip">
                           {citation}
@@ -824,9 +817,9 @@ export default function App() {
               }}
             >
               <label className="composer-label" htmlFor="messageInput">
-                Message
+                {t.message}
               </label>
-              {activeWorkflow ? <div className="workflow-chip">Current tool: {activeWorkflow.label}</div> : null}
+              {activeWorkflow ? <div className="workflow-chip">{t.currentTool(activeWorkflow.label)}</div> : null}
               <textarea
                 id="messageInput"
                 rows={1}
@@ -838,11 +831,11 @@ export default function App() {
                     void send();
                   }
                 }}
-                placeholder="Ask or paste text"
+                placeholder={t.composerPlaceholder}
               />
               <button type="submit" disabled={sending || !input.trim()}>
                 <Send size={16} />
-                Send
+                {t.send}
               </button>
             </form>
           </section>

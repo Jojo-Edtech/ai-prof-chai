@@ -689,6 +689,12 @@ p {
   border-color: var(--teal);
 }
 
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .workbench-body {
   display: grid;
   grid-template-columns: minmax(640px, 1180px);
