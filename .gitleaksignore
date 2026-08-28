@@ -1,0 +1,3 @@
+# Verified false positives: localStorage keys, not credentials.
+3e3cd24b00d0f5bfc9623f7125550d6c8bcd52df:src/i18n.ts:generic-api-key:3
+1ab679832e3af4bd631a26fe645a58a4f9f601d3:src/App.tsx:generic-api-key:52
