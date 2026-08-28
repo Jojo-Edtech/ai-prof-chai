@@ -253,8 +253,14 @@ app.post("/api/pdfs/upload", fileWriteLimiter, express.raw({ type: ["application
     response.status(400).json({ error: "Please choose a real PDF file." });
     return;
   }
-  const buffer = request.body;
-  if (buffer.length < 5 || buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
+  const buffer = Buffer.from(request.body);
+  const hasPdfSignature = buffer.length >= 5
+    && buffer[0] === 0x25
+    && buffer[1] === 0x50
+    && buffer[2] === 0x44
+    && buffer[3] === 0x46
+    && buffer[4] === 0x2d;
+  if (!hasPdfSignature) {
     response.status(400).json({ error: "Please choose a real PDF file." });
     return;
   }
