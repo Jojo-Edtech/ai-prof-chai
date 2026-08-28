@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadMissingPdfQueue } from "../server/missing-pdfs";
 import type { CorpusProfile, MissingPdfQueueItem, PublicationRecord } from "../src/shared/types";
+import { decodeHtmlEntitiesOnce } from "./html-entities";
 
 type CuhkCandidate = {
   label: string;
@@ -124,18 +125,10 @@ async function fetchText(url: string) {
   return text;
 }
 
-function decodeHtml(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&#x2F;/g, "/")
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;/g, "'");
-}
-
 function extractPdfCandidates(pageUrl: string, html: string) {
   const candidates = new Map<string, CuhkCandidate>();
   const add = (label: string, rawUrl: string) => {
-    const decoded = decodeHtml(rawUrl);
+    const decoded = decodeHtmlEntitiesOnce(rawUrl);
     const pdfUrl = decoded.startsWith("/") ? new URL(decoded, pageUrl).toString() : decoded;
     if (/^https?:\/\/research\.cuhk\.edu\.hk\/files\/.+\.pdf/i.test(pdfUrl)) candidates.set(pdfUrl, { label, pageUrl, pdfUrl });
   };

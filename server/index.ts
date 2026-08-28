@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -18,6 +19,27 @@ const host = process.env.HOST || (process.env.NODE_ENV === "production" ? "0.0.0
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
+
+const fileReadLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 180,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Too many file requests. Please wait a moment and try again." }
+});
+const fileWriteLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Too many file changes. Please wait before trying again." }
+});
+const pageLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 300,
+  standardHeaders: "draft-8",
+  legacyHeaders: false
+});
 
 loadLocalEnv(projectRoot);
 
@@ -40,7 +62,7 @@ app.get("/api/fulltext", (_request, response) => {
   response.json(fullTextStatus(loadFullTextIndex(projectRoot)));
 });
 
-app.get("/api/pdf-audit", (_request, response) => {
+app.get("/api/pdf-audit", fileReadLimiter, (_request, response) => {
   const auditPath = path.join(projectRoot, "data", "processed", "saved-pdf-audit.json");
   if (!fs.existsSync(auditPath)) {
     response.json({ summary: { available: false, targetPdfSaved: 0, high: 0, medium: 0, low: 0 } });
@@ -61,7 +83,7 @@ app.get("/api/pdf-audit", (_request, response) => {
   });
 });
 
-app.get("/api/project-status", (_request, response) => {
+app.get("/api/project-status", fileReadLimiter, (_request, response) => {
   const statusPath = path.join(projectRoot, "outputs", "ai-prof-chai-project-status.md");
   if (!fs.existsSync(statusPath)) {
     response.status(404).send("Project status report has not been generated. Run npm run report:status first.");
@@ -70,7 +92,7 @@ app.get("/api/project-status", (_request, response) => {
   response.type("text/markdown").sendFile(statusPath);
 });
 
-app.get("/api/goal-audit", (_request, response) => {
+app.get("/api/goal-audit", fileReadLimiter, (_request, response) => {
   const auditPath = path.join(projectRoot, "outputs", "goal-completion-audit.md");
   if (!fs.existsSync(auditPath)) {
     response.status(404).send("Goal audit has not been generated. Run npm run audit:goal first.");
@@ -79,8 +101,8 @@ app.get("/api/goal-audit", (_request, response) => {
   response.type("text/markdown").sendFile(auditPath);
 });
 
-app.get("/api/coverage-matrix/:format", (request, response) => {
-  const format = request.params.format;
+app.get("/api/coverage-matrix/:format", fileReadLimiter, (request, response) => {
+  const format = typeof request.params.format === "string" ? request.params.format : "";
   const files: Record<string, string> = {
     csv: "target-coverage-matrix.csv",
     md: "target-coverage-matrix.md"
@@ -102,8 +124,8 @@ app.get("/api/coverage-matrix/:format", (request, response) => {
   response.download(filePath, fileName);
 });
 
-app.get("/api/evidence-pack/:format", (request, response) => {
-  const format = request.params.format;
+app.get("/api/evidence-pack/:format", fileReadLimiter, (request, response) => {
+  const format = typeof request.params.format === "string" ? request.params.format : "";
   const files: Record<string, string> = {
     csv: "ai-prof-chai-evidence-pack.csv",
     md: "ai-prof-chai-evidence-pack.md"
@@ -125,7 +147,7 @@ app.get("/api/evidence-pack/:format", (request, response) => {
   response.download(filePath, fileName);
 });
 
-app.get("/api/assistant/eval", (_request, response) => {
+app.get("/api/assistant/eval", fileReadLimiter, (_request, response) => {
   const evalPath = path.join(projectRoot, "outputs", "ai-prof-chai-local-eval.md");
   if (!fs.existsSync(evalPath)) {
     response.status(404).send("Assistant local evaluation has not been generated. Run npm run eval:assistant first.");
@@ -138,7 +160,7 @@ app.get("/api/missing-pdfs", (_request, response) => {
   response.json(loadMissingPdfQueue(projectRoot));
 });
 
-app.patch("/api/missing-pdfs/progress", (request, response) => {
+app.patch("/api/missing-pdfs/progress", fileWriteLimiter, (request, response) => {
   try {
     const key = String(request.body?.key || "");
     const status = String(request.body?.status || "") as MissingPdfProgressStatus;
@@ -199,7 +221,7 @@ function runRefreshPipeline(before: ReturnType<typeof refreshSnapshot>, noChange
   };
 }
 
-app.post("/api/pdfs/refresh", (_request, response) => {
+app.post("/api/pdfs/refresh", fileWriteLimiter, (_request, response) => {
   const before = refreshSnapshot();
   const payload = runRefreshPipeline(before, (missing) => `Scanned downloads; no new target PDFs were matched. ${missing} still pending.`);
 
@@ -226,12 +248,12 @@ function safePdfName(value: string) {
   return withExtension.slice(0, 160);
 }
 
-function pdfBuffer(value: unknown) {
-  return Buffer.isBuffer(value) ? value : Buffer.alloc(0);
-}
-
-app.post("/api/pdfs/upload", express.raw({ type: ["application/pdf", "application/octet-stream"], limit: "100mb" }), (request, response) => {
-  const buffer = pdfBuffer(request.body);
+app.post("/api/pdfs/upload", fileWriteLimiter, express.raw({ type: ["application/pdf", "application/octet-stream"], limit: "100mb" }), (request, response) => {
+  if (!Buffer.isBuffer(request.body)) {
+    response.status(400).json({ error: "Please choose a real PDF file." });
+    return;
+  }
+  const buffer = request.body;
   if (buffer.length < 5 || buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
     response.status(400).json({ error: "Please choose a real PDF file." });
     return;
@@ -256,7 +278,7 @@ app.post("/api/pdfs/upload", express.raw({ type: ["application/pdf", "applicatio
   response.json(payload);
 });
 
-app.get("/api/missing-pdfs/download-pack", (_request, response) => {
+app.get("/api/missing-pdfs/download-pack", fileReadLimiter, (_request, response) => {
   const downloadPackPath = path.join(projectRoot, "outputs", "missing-pdf-download-pack.html");
   if (!fs.existsSync(downloadPackPath)) {
     response.status(404).send("Missing PDF download pack has not been generated. Run npm run export:download-pack first.");
@@ -265,7 +287,7 @@ app.get("/api/missing-pdfs/download-pack", (_request, response) => {
   response.sendFile(downloadPackPath);
 });
 
-app.get("/api/missing-pdfs/sprint-checklist", (_request, response) => {
+app.get("/api/missing-pdfs/sprint-checklist", fileReadLimiter, (_request, response) => {
   const sprintPath = path.join(projectRoot, "outputs", "missing-pdf-sprint-checklist.html");
   if (!fs.existsSync(sprintPath)) {
     response.status(404).send("Sprint checklist has not been generated. Run npm run export:sprint first.");
@@ -274,7 +296,7 @@ app.get("/api/missing-pdfs/sprint-checklist", (_request, response) => {
   response.sendFile(sprintPath);
 });
 
-app.get("/api/missing-pdfs/browser-shortcuts", (_request, response) => {
+app.get("/api/missing-pdfs/browser-shortcuts", fileReadLimiter, (_request, response) => {
   const shortcutIndexPath = path.join(projectRoot, "outputs", "missing-pdf-browser-shortcuts", "index.html");
   if (!fs.existsSync(shortcutIndexPath)) {
     response.status(404).send("Browser shortcuts have not been generated. Run npm run export:browser-shortcuts first.");
@@ -283,7 +305,7 @@ app.get("/api/missing-pdfs/browser-shortcuts", (_request, response) => {
   response.sendFile(shortcutIndexPath);
 });
 
-app.get("/api/missing-pdfs/acquisition-pack", (_request, response) => {
+app.get("/api/missing-pdfs/acquisition-pack", fileReadLimiter, (_request, response) => {
   const acquisitionPackPath = path.join(projectRoot, "outputs", "missing-pdf-acquisition-pack.html");
   if (!fs.existsSync(acquisitionPackPath)) {
     response.status(404).send("Acquisition pack has not been generated. Run npm run export:acquisition-pack first.");
@@ -292,7 +314,7 @@ app.get("/api/missing-pdfs/acquisition-pack", (_request, response) => {
   response.sendFile(acquisitionPackPath);
 });
 
-app.get("/api/missing-pdfs/open-access-recheck", (_request, response) => {
+app.get("/api/missing-pdfs/open-access-recheck", fileReadLimiter, (_request, response) => {
   const recheckPath = path.join(projectRoot, "outputs", "missing-pdf-open-access-recheck.md");
   if (!fs.existsSync(recheckPath)) {
     response.status(404).send("Open access recheck has not been generated. Run npm run check:missing-oa first.");
@@ -301,7 +323,7 @@ app.get("/api/missing-pdfs/open-access-recheck", (_request, response) => {
   response.type("text/markdown").sendFile(recheckPath);
 });
 
-app.get("/api/missing-pdfs/public-web-recheck", (_request, response) => {
+app.get("/api/missing-pdfs/public-web-recheck", fileReadLimiter, (_request, response) => {
   const recheckPath = path.join(projectRoot, "outputs", "missing-pdf-public-web-recheck.md");
   if (!fs.existsSync(recheckPath)) {
     response.status(404).send("Public web recheck has not been generated yet.");
@@ -310,7 +332,7 @@ app.get("/api/missing-pdfs/public-web-recheck", (_request, response) => {
   response.type("text/markdown").sendFile(recheckPath);
 });
 
-app.get("/api/missing-pdfs/cuhk-pure-check", (_request, response) => {
+app.get("/api/missing-pdfs/cuhk-pure-check", fileReadLimiter, (_request, response) => {
   const recheckPath = path.join(projectRoot, "outputs", "missing-pdf-cuhk-pure-check.md");
   if (!fs.existsSync(recheckPath)) {
     response.status(404).send("CUHK Pure check has not been generated. Run npm run check:cuhk-pure first.");
@@ -319,8 +341,8 @@ app.get("/api/missing-pdfs/cuhk-pure-check", (_request, response) => {
   response.type("text/markdown").sendFile(recheckPath);
 });
 
-app.get("/api/missing-pdfs/library-request/:format", (request, response) => {
-  const format = request.params.format;
+app.get("/api/missing-pdfs/library-request/:format", fileReadLimiter, (request, response) => {
+  const format = typeof request.params.format === "string" ? request.params.format : "";
   const files: Record<string, string> = {
     csv: "missing-pdf-library-request.csv",
     ris: "missing-pdf-library-request.ris",
@@ -406,7 +428,7 @@ app.post("/api/assistant/chat", async (request, response) => {
 if (process.env.NODE_ENV === "production") {
   const distDir = path.join(projectRoot, "dist");
   app.use(express.static(distDir));
-  app.get(/.*/, (_request, response) => {
+  app.get(/.*/, pageLimiter, (_request, response) => {
     response.sendFile(path.join(distDir, "index.html"));
   });
 }

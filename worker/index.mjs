@@ -1,5 +1,7 @@
 import { BASE_SYSTEM_PROMPT, DISTILLED_KNOWLEDGE, EVIDENCE_SUMMARY } from "./knowledge.mjs";
 
+import { buildCorsHeaders } from "./cors.mjs";
+
 const SESSION_COOKIE_NAME = "ai_prof_chai_guest";
 const DEFAULT_MODEL = "Qwen/Qwen3-30B-A3B-Instruct-2507";
 const MODELSCOPE_BASE_URL = "https://api-inference.modelscope.cn/v1";
@@ -379,28 +381,7 @@ function json(request, env, body, status = 200) {
 }
 
 function corsHeaders(request, env) {
-  const origin = request.headers.get("Origin");
-  const allowed = allowedOrigins(env);
-  const allowOrigin = origin && (allowed.includes("*") || allowed.includes(origin)) ? origin : "";
-  const headers = {
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-AI-Prof-Chai-Visitor, x-filename",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin"
-  };
-  if (allowOrigin) {
-    headers["Access-Control-Allow-Origin"] = allowOrigin;
-    headers["Access-Control-Allow-Credentials"] = "true";
-  }
-  return headers;
-}
-
-function allowedOrigins(env) {
-  const configured = String(env.ALLOWED_ORIGINS || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  return configured.length ? configured : DEFAULT_ALLOWED_ORIGINS;
+  return buildCorsHeaders(request, env, DEFAULT_ALLOWED_ORIGINS);
 }
 
 function withGuestCookie(userId, response) {
